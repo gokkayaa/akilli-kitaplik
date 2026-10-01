@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 </head>
 <body>
-<title>Okuma Rafı</title>
+<title>Akıllı Kitaplık</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
@@ -45,7 +45,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .logo img{height:60px;width:auto;display:block}
 .band h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.9rem,4.5vw,2.8rem);line-height:.95;margin:0;letter-spacing:-.01em;color:#04282b}
 .band p{margin:4px 0 0;font-weight:700;color:#0a4246;font-size:1rem}
-.wall{max-width:1100px;margin:-36px auto 0;padding-inline:16px;padding-block:0 40px;display:grid;gap:34px}
+.wall{max-width:1100px;margin:-36px auto 0;padding-inline:16px;padding-block:0 40px;display:grid;gap:14px}
+.shelves{display:grid;gap:34px}
+.hello{margin:0;justify-self:start;background:var(--card);color:var(--teal-deep);font-family:var(--f-display);font-weight:800;font-size:1.15rem;border-radius:999px;padding:6px 18px;box-shadow:var(--shadow)}
 .shelf{background:var(--card);border-radius:22px;padding:20px 20px 0;box-shadow:var(--shadow)}
 .shelf-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;padding-inline:4px}
 .shelf-h h2{font-family:var(--f-display);font-weight:800;font-size:1.7rem;margin:0;line-height:1}
@@ -207,10 +209,10 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
   <header class="band">
     <div class="band-in">
       <div class="logo"><img src="assets/maarif-logo.png" alt="Türkiye Maarif Vakfı"></div>
-      <div><h1>Okuma Rafı</h1><p>Haydi, birlikte okuyalım!</p></div>
+      <div><h1>Akıllı Kitaplık</h1><p>Etkileşimli Türkçe okuma kitapları</p></div>
     </div>
   </header>
-  <main class="wall" id="wall"></main>
+  <main class="wall" id="wallWrap"><p class="hello">Haydi, birlikte okuyalım!</p><div class="shelves" id="wall"></div></main>
   <p class="foot">Kitaplar: Türkiye Maarif Vakfı Yayınları · Türkçe Okuma Kitabı serisi</p>
 </div>
 
@@ -297,7 +299,7 @@ async function route(){
   const id = location.hash.replace('#', '');
   const meta = LIB.shelves.flatMap(s => s.books).find(b => b.id === id && b.ready);
   if(meta){ await openBook(meta); }
-  else { $('#reader').hidden = true; $('#lib').hidden = false; renderLib(); document.title = 'Okuma Rafı'; }
+  else { $('#reader').hidden = true; $('#lib').hidden = false; renderLib(); document.title = 'Akıllı Kitaplık'; }
 }
 window.addEventListener('hashchange', route);
 $('#backBtn').onclick = () => { location.hash = ''; };
@@ -308,7 +310,7 @@ async function openBook(meta){
     BOOK = await (await fetch(`books/${meta.id}/book.json`)).json();
   }
   $('#lib').hidden = true; $('#reader').hidden = false;
-  $('#rTitle').textContent = BOOK.title; document.title = BOOK.title + ' · Okuma Rafı';
+  $('#rTitle').textContent = BOOK.title; document.title = BOOK.title + ' · Akıllı Kitaplık';
   bag = store.get('or.bag.' + BOOK.id, []);
   cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
   quizDone = new Set(); sessionStars = new Set(); $('#backQ').hidden = true;
