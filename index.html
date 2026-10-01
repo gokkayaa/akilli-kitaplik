@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Okuma Rafı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a school library wall — teal header band, then shelves of face-out books on planks; tapping a cover opens the reading desk. */
+:root{
+  --desk:#e9f1f2; --desk-2:#dbe8ea; --card:#ffffff; --ink:#15302f; --ink-soft:#4f6a6b;
+  --teal:#00adb9; --teal-deep:#00747c; --teal-wash:rgba(0,173,185,.16); --sun:#ffd43b;
+  --plank:#c9dfe1; --plank-edge:#a9c8cb;
+  --line:rgba(21,48,47,.12); --shadow:0 18px 40px -18px rgba(10,50,55,.45);
+  --f-display:"Baloo 2","Nunito",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#0e1c1e; --desk-2:#16292c; --card:#1b3135; --ink:#e3f1f1; --ink-soft:#9fbcbe;
+  --teal:#2cc6d1; --teal-deep:#6fdde4; --teal-wash:rgba(44,198,209,.22);
+  --plank:#1f3a3e; --plank-edge:#2b4c51;
+  --line:rgba(227,241,241,.14); --shadow:0 18px 40px -18px rgba(0,0,0,.8); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#0e1c1e; --desk-2:#16292c; --card:#1b3135; --ink:#e3f1f1; --ink-soft:#9fbcbe;
+  --teal:#2cc6d1; --teal-deep:#6fdde4; --teal-wash:rgba(44,198,209,.22);
+  --plank:#1f3a3e; --plank-edge:#2b4c51;
+  --line:rgba(227,241,241,.14); --shadow:0 18px 40px -18px rgba(0,0,0,.8); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;margin:0;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ================= LIBRARY ================= */
+#lib{min-height:100%}
+.band{background:#00adb9;color:#05292c;padding-inline:16px;padding-block:18px 56px}
+.band-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.logo{background:#fff;border-radius:16px;padding:6px 8px;flex:none;display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,60,65,.6)}
+.logo img{height:60px;width:auto;display:block}
+.band h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.9rem,4.5vw,2.8rem);line-height:.95;margin:0;letter-spacing:-.01em;color:#04282b}
+.band p{margin:4px 0 0;font-weight:700;color:#0a4246;font-size:1rem}
+.wall{max-width:1100px;margin:-36px auto 0;padding-inline:16px;padding-block:0 40px;display:grid;gap:34px}
+.shelf{background:var(--card);border-radius:22px;padding:20px 20px 0;box-shadow:var(--shadow)}
+.shelf-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;padding-inline:4px}
+.shelf-h h2{font-family:var(--f-display);font-weight:800;font-size:1.7rem;margin:0;line-height:1}
+.lvl{background:var(--teal-wash);color:var(--teal-deep);border-radius:999px;padding:3px 12px;font-weight:800;font-size:.85rem;letter-spacing:.02em}
+.shelf-h small{color:var(--ink-soft);font-weight:700;font-size:.88rem;flex-basis:100%}
+.row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:26px 8px 0;position:relative}
+.row::after{content:"";position:absolute;left:-20px;right:-20px;bottom:0;height:16px;background:var(--plank);
+  border-top:3px solid var(--plank-edge);border-radius:0 0 22px 22px}
+.bk{display:flex;flex-direction:column;gap:10px;padding-bottom:30px;position:relative;z-index:1;border:0;background:none;text-align:left;padding-inline:0}
+.cover{position:relative;border-radius:4px 10px 10px 4px;overflow:hidden;background:#fff;
+  box-shadow:0 1px 0 rgba(0,0,0,.05),0 14px 22px -12px rgba(10,50,55,.55),inset 6px 0 0 rgba(0,0,0,.05);
+  transition:transform .25s cubic-bezier(.2,.8,.3,1.2),box-shadow .25s}
+.cover img{display:block;width:100%;aspect-ratio:680/624;object-fit:cover}
+.cover::before{content:"";position:absolute;inset:0 auto 0 0;width:10px;background:linear-gradient(90deg,rgba(0,0,0,.12),rgba(0,0,0,0));z-index:1}
+.bk.ready:hover .cover,.bk.ready:focus-visible .cover{transform:translateY(-8px) rotate(-1deg);box-shadow:0 26px 30px -16px rgba(10,50,55,.6)}
+.bk.soon{cursor:default}
+.bk.soon .cover img{filter:saturate(.35) opacity(.75)}
+.ribbon{position:absolute;top:10px;right:-4px;background:var(--ink);color:var(--card);font-weight:800;font-size:.75rem;
+  padding:4px 10px 4px 12px;border-radius:999px 0 0 999px;z-index:2;letter-spacing:.03em}
+.bt{font-family:var(--f-display);font-weight:800;font-size:1.12rem;line-height:1.1}
+.bt span{color:var(--teal-deep);margin-right:4px}
+.meta{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:7px;border-radius:99px;background:var(--desk-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:99px}
+.star{background:rgba(255,212,59,.35);color:var(--ink);border-radius:99px;padding:1px 8px}
+.foot{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:0 30px;color:var(--ink-soft);font-size:.82rem;font-weight:700}
+@media (max-width:760px){.row{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
+  .row::after{display:none}
+  .bk{padding-bottom:14px;border-bottom:12px solid var(--plank)}
+  .shelf{padding-bottom:6px}
+  .logo img{height:46px}}
+
+/* ================= READER ================= */
+#reader{height:100%;display:flex;flex-direction:column;padding-inline:16px}
+.rbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding-block:12px 10px}
+.back{border:0;background:var(--teal);color:#062a2d;border-radius:999px;padding:7px 14px 7px 10px;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+.rtitle{font-family:var(--f-display);font-weight:800;font-size:1.4rem;line-height:1;margin:0 auto 0 4px;min-width:0}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:flex;background:var(--desk-2);border-radius:999px;padding:3px;gap:2px}
+.chip{border:0;background:transparent;border-radius:999px;padding:6px 12px;font-weight:800;font-size:.85rem;color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--teal);color:#062a2d}
+.tbtn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.85rem;display:inline-flex;gap:6px;align-items:center}
+.tbtn[aria-pressed="true"]{border-color:var(--teal);color:var(--teal-deep)}
+.count{background:var(--sun);color:#3a2e00;border-radius:999px;min-width:22px;padding:0 6px;font-size:.78rem;text-align:center;font-variant-numeric:tabular-nums}
+
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative}
+.book{display:flex;box-shadow:var(--shadow);border-radius:6px;overflow:hidden;background:#fff;max-width:100%}
+.page{position:relative;aspect-ratio:680.31/623.62;height:100%;flex:none}
+.page img{display:block;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.page+.page::before{content:"";position:absolute;inset:0 auto 0 0;width:28px;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,0))}
+.book.two .page:first-child::after{content:"";position:absolute;inset:0 0 0 auto;width:22px;pointer-events:none;background:linear-gradient(270deg,rgba(0,0,0,.12),rgba(0,0,0,0))}
+
+.hit{position:absolute;border:0;padding:0;margin:0;background:transparent;border-radius:6px;z-index:2;-webkit-tap-highlight-color:transparent;transition:background-color .15s}
+.hints .hit{box-shadow:inset 0 -3px 0 rgba(0,173,185,.55)}
+.hints .hit.banner{box-shadow:none;outline:2px dashed rgba(0,173,185,.7);outline-offset:-2px;border-radius:14px}
+.hit:hover{background:var(--teal-wash)}
+.hit.sent{background:rgba(255,212,59,.22)}
+.hit.on{background:rgba(0,173,185,.32);box-shadow:inset 0 -3px 0 #00adb9}
+.hit.banner.on{background:rgba(0,173,185,.18)}
+
+.nav{display:flex;justify-content:center;align-items:center;gap:14px;padding-block:8px 12px}
+.nav button{border:1px solid var(--line);background:var(--card);width:46px;height:46px;border-radius:50%;font-size:1.4rem;font-weight:800;line-height:1}
+.nav button:disabled{opacity:.35;cursor:default}
+.nav output{font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink-soft);min-width:84px;text-align:center}
+.tip{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font-weight:800;box-shadow:var(--shadow);z-index:3;white-space:nowrap;font-size:.95rem;transition:opacity .4s}
+.tip.gone{opacity:0;pointer-events:none}
+
+.pop{position:fixed;z-index:20;width:min(360px, calc(100vw - 24px));background:var(--card);color:var(--ink);border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--line);padding:14px 16px;max-height:min(70vh,560px);overflow:auto}
+.pop-h{display:flex;align-items:flex-start;gap:8px}
+.pop-w{font-family:var(--f-display);font-weight:800;font-size:1.7rem;line-height:1.05;margin:0;flex:1;min-width:0;overflow-wrap:anywhere}
+.round{border:0;background:var(--desk-2);width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:1.05rem}
+.round.say{background:var(--teal);color:#062a2d}
+.note{margin:4px 0 0;color:var(--ink-soft);font-weight:700;font-size:.88rem}
+.cog{display:inline-flex;gap:6px;align-items:center;margin-top:8px;background:rgba(255,212,59,.28);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:800}
+.tr{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.tr li{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:baseline}
+.tr .lb{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-deep)}
+.tr .tx{font-size:1.08rem;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.act{flex:1;border:1px solid var(--line);background:var(--desk);border-radius:12px;padding:9px 10px;font-weight:800;font-size:.88rem;white-space:nowrap}
+.act[aria-pressed="true"],.act.done{border-color:var(--teal);color:var(--teal-deep);background:var(--teal-wash)}
+.sentbox{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+.sentbox .tq{font-family:var(--f-display);font-weight:700;font-size:1.15rem;line-height:1.25;display:flex;gap:8px;align-items:flex-start}
+.sentbox .tq span{flex:1}
+.sentbox .tr .tx{font-size:.98rem;font-weight:600}
+
+.scrim{position:fixed;inset:0;background:rgba(5,25,27,.4);z-index:30}
+.drawer{position:fixed;z-index:31;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--card);color:var(--ink);box-shadow:var(--shadow);display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.drawer h2{font-family:var(--f-display);font-weight:800;font-size:1.5rem;margin:0;flex:1}
+.dh{display:flex;align-items:center;gap:10px}
+.drawer p{color:var(--ink-soft);margin:6px 0 12px}
+.bag{list-style:none;margin:0;padding:0;overflow:auto;display:grid;gap:8px;align-content:start}
+.bag li{border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.bag b{font-family:var(--f-display);font-size:1.15rem}
+.bag small{grid-column:1;color:var(--ink-soft);font-weight:700;font-size:.85rem}
+.bag button{grid-row:1/span 2;grid-column:2;align-self:center;border:0;background:var(--desk-2);border-radius:10px;padding:6px 10px;font-weight:800;font-size:.8rem}
+.bag .empty{display:block;border:2px dashed var(--line);border-radius:16px;padding:22px;text-align:center;color:var(--ink-soft);font-weight:700}
+
+@media (max-width:560px){#fsBtn{display:none}.rtitle{font-size:1.15rem}.chip{padding:6px 10px}.tr li{grid-template-columns:78px 1fr}.tr .lb{font-size:.66rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<!-- LIBRARY -->
+<div id="lib">
+  <header class="band">
+    <div class="band-in">
+      <div class="logo"><img src="assets/maarif-logo.png" alt="Türkiye Maarif Vakfı"></div>
+      <div><h1>Okuma Rafı</h1><p>Kitabını seç, oku, dokun ve öğren!</p></div>
+    </div>
+  </header>
+  <main class="wall" id="wall"></main>
+  <p class="foot">Kitaplar: Türkiye Maarif Vakfı Yayınları · Türkçe Okuma Kitabı serisi</p>
+</div>
+
+<!-- READER -->
+<div id="reader" hidden>
+  <header class="rbar">
+    <button class="back" id="backBtn">‹ Raf</button>
+    <h2 class="rtitle" id="rTitle"></h2>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Diller">
+        <button class="chip" id="lang-en" data-lang="en">EN</button>
+        <button class="chip" id="lang-ky" data-lang="ky">KG</button>
+        <button class="chip" id="lang-ru" data-lang="ru">RU</button>
+      </div>
+      <button class="tbtn" id="hintBtn">İpucu</button>
+      <button class="tbtn" id="bagBtn">Çantam <span class="count" id="bagCount">0</span></button>
+      <button class="tbtn" id="fsBtn" title="Tam ekran" aria-label="Tam ekran">⛶</button>
+    </div>
+  </header>
+  <main class="stage" id="stage">
+    <div class="book" id="book"></div>
+    <div class="tip gone" id="tip">Haydi, kelimeye dokun!</div>
+  </main>
+  <nav class="nav" aria-label="Sayfalar">
+    <button id="prev" aria-label="Önceki sayfa">‹</button>
+    <output id="pno"></output>
+    <button id="next" aria-label="Sonraki sayfa">›</button>
+  </nav>
+</div>
+
+<div class="pop" id="pop" hidden role="dialog" aria-label="Kelime"></div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Kelime çantam">
+  <div class="dh"><h2>Kelime çantam</h2><button class="round" id="bagClose" aria-label="Kapat">✕</button></div>
+  <p>Dokun, öğren, topla!</p>
+  <ul class="bag" id="bagList"></ul>
+</aside>
+
+<script>
+const $ = s => document.querySelector(s);
+const LBL = {en:'English', ky:'Кыргызча', ru:'Русский'};
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let LIB = null, BOOK = null;
+let langs = store.get('or.langs', ['en','ky','ru']);
+let hints = store.get('or.hints', true);
+let bag = [], cur = 1, active = null, showSent = false, two = false;
+
+/* ---------- library ---------- */
+async function loadLib(){
+  if(LIB) return LIB;
+  LIB = await (await fetch('library.json')).json();
+  return LIB;
+}
+function renderLib(){
+  const wall = $('#wall');
+  wall.innerHTML = LIB.shelves.map(sh => `
+    <section class="shelf" aria-labelledby="sh-${sh.id}">
+      <div class="shelf-h"><h2 id="sh-${sh.id}">${sh.title}</h2><span class="lvl">${sh.sub}</span><small>${sh.note || ''}</small></div>
+      <div class="row">${sh.books.map(b => bookCard(b)).join('')}</div>
+    </section>`).join('');
+  wall.querySelectorAll('.bk.ready').forEach(el => el.onclick = () => { location.hash = el.dataset.id; });
+}
+function bookCard(b){
+  const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
+  const pct = b.ready ? Math.round(Math.min(last, b.pages) / b.pages * 100) : 0;
+  return `<button class="bk ${b.ready ? 'ready' : 'soon'}" data-id="${b.id}" ${b.ready ? '' : 'aria-disabled="true" tabindex="-1"'}>
+    <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy"></div>
+    <div class="bt"><span>${b.no}</span>${b.title}</div>
+    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
+  </button>`;
+}
+
+/* ---------- routing ---------- */
+async function route(){
+  closePop(); closeBag();
+  await loadLib();
+  const id = location.hash.replace('#', '');
+  const meta = LIB.shelves.flatMap(s => s.books).find(b => b.id === id && b.ready);
+  if(meta){ await openBook(meta); }
+  else { $('#reader').hidden = true; $('#lib').hidden = false; renderLib(); document.title = 'Okuma Rafı'; }
+}
+window.addEventListener('hashchange', route);
+$('#backBtn').onclick = () => { location.hash = ''; };
+
+/* ---------- reader ---------- */
+async function openBook(meta){
+  if(!BOOK || BOOK.id !== meta.id){
+    BOOK = await (await fetch(`books/${meta.id}/book.json`)).json();
+  }
+  $('#lib').hidden = true; $('#reader').hidden = false;
+  $('#rTitle').textContent = BOOK.title; document.title = BOOK.title + ' · Okuma Rafı';
+  bag = store.get('or.bag.' + BOOK.id, []);
+  cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
+  renderBag(); syncLangs(); syncHints(); layout();
+  const tip = $('#tip'); tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
+}
+function spreadOf(n){
+  if(!two) return [n];
+  const N = BOOK.pages.length;
+  if(n === 1) return [1];
+  if(n === N && N % 2 === 0) return [N];
+  const l = n % 2 === 0 ? n : n - 1;
+  return [l, l + 1].filter(x => x <= N);
+}
+function layout(){
+  if($('#reader').hidden) return;
+  two = window.innerWidth >= 760 && window.innerWidth > window.innerHeight * 1.05;
+  draw();
+}
+function draw(){
+  closePop();
+  const pages = spreadOf(cur), bookEl = $('#book'), stage = $('#stage');
+  bookEl.innerHTML = ''; bookEl.classList.toggle('two', pages.length === 2);
+  pages.forEach(n => bookEl.appendChild(pageEl(BOOK.pages[n - 1])));
+  // size: fit spread inside stage
+  const ratio = 680.31 / 623.62 * pages.length;
+  const sw = stage.clientWidth, sh = stage.clientHeight;
+  let h = Math.min(sh, sw / ratio);
+  bookEl.style.height = h + 'px';
+  const N = BOOK.pages.length;
+  $('#pno').textContent = pages.length === 2 ? `${pages[0]}–${pages[1]} / ${N}` : `${pages[0]} / ${N}`;
+  $('#prev').disabled = pages[0] <= 1; $('#next').disabled = pages[pages.length - 1] >= N;
+  store.set('or.page.' + BOOK.id, pages[pages.length - 1]);
+  // preload neighbours
+  [pages[0] - 2, pages[0] - 1, pages[pages.length - 1] + 1, pages[pages.length - 1] + 2].forEach(n => {
+    if(n >= 1 && n <= N){ const im = new Image(); im.src = `books/${BOOK.id}/${BOOK.pages[n - 1].img}`; }
+  });
+}
+function pageEl(p){
+  const pg = document.createElement('div'); pg.className = 'page';
+  pg.innerHTML = `<img src="books/${BOOK.id}/${p.img}" alt="Sayfa ${p.no}">`;
+  p.words.forEach(w => {
+    const b = document.createElement('button');
+    b.className = 'hit' + (w.banner ? ' banner' : '');
+    b.style.cssText = `left:${w.b[0]}%;top:${w.b[1]}%;width:${w.b[2]}%;height:${w.b[3]}%`;
+    b.setAttribute('aria-label', w.t);
+    b.dataset.k = w.k; b.dataset.s = w.s;
+    b.addEventListener('click', ev => { ev.stopPropagation(); openWord(b); });
+    pg.appendChild(b);
+  });
+  return pg;
+}
+function go(d){
+  const pages = spreadOf(cur), N = BOOK.pages.length;
+  const n = d > 0 ? pages[pages.length - 1] + 1 : pages[0] - 1;
+  if(n < 1 || n > N) return;
+  cur = n; draw();
+}
+$('#prev').onclick = () => go(-1);
+$('#next').onclick = () => go(1);
+document.addEventListener('keydown', e => {
+  if($('#reader').hidden) return;
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+  if(e.key === 'Escape'){ closePop(); closeBag(); }
+});
+let tx = null;
+$('#stage').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+$('#stage').addEventListener('touchend', e => {
+  if(tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if(Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
+});
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
+
+/* ---------- speech (optional) ---------- */
+let trVoice = null;
+function pickVoice(){ if(!('speechSynthesis' in window)) return; trVoice = speechSynthesis.getVoices().find(x => /^tr(-|_|$)/i.test(x.lang)) || null; }
+pickVoice();
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => { pickVoice(); if(active) render(active); };
+function say(text){ if(!trVoice) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.voice = trVoice; u.lang = trVoice.lang; u.rate = .82; speechSynthesis.speak(u); }
+
+/* ---------- word card ---------- */
+const pop = $('#pop');
+function trList(o){ return `<ul class="tr">${langs.map(l => `<li><span class="lb">${LBL[l]}</span><span class="tx">${o[l]}</span></li>`).join('')}</ul>`; }
+const inBag = k => bag.includes(k);
+function render(btn){
+  const g = BOOK.gloss[btn.dataset.k], s = BOOK.sent[btn.dataset.s];
+  const spk = trVoice ? `<button class="round say" data-say="w" aria-label="Dinle">🔊</button>` : '';
+  pop.innerHTML = `
+    <div class="pop-h"><h2 class="pop-w">${g.w}</h2>${spk}<button class="round" data-x aria-label="Kapat">✕</button></div>
+    <p class="note">${g.tr}</p>
+    ${g.cog ? `<span class="cog">★ Kırgızcada da var: ${g.cog}</span>` : ''}
+    ${trList(g)}
+    <div class="acts">
+      <button class="act" data-sent aria-pressed="${showSent}">Cümleyi çevir</button>
+      <button class="act ${inBag(btn.dataset.k) ? 'done' : ''}" data-bag>${inBag(btn.dataset.k) ? '✓ Çantada' : '★ Çantama ekle'}</button>
+    </div>
+    ${showSent ? `<div class="sentbox"><div class="tq"><span>${s.tr}</span>${trVoice ? '<button class="round say" data-say="s" aria-label="Cümleyi dinle">🔊</button>' : ''}</div>${trList(s)}</div>` : ''}`;
+  pop.querySelector('[data-x]').onclick = closePop;
+  pop.querySelectorAll('[data-say]').forEach(b => b.onclick = () => say(b.dataset.say === 'w' ? g.w : s.tr.replace(/^[^:]+:\s*/, '')));
+  pop.querySelector('[data-sent]').onclick = () => { showSent = !showSent; render(btn); place(btn); };
+  pop.querySelector('[data-bag]').onclick = () => {
+    const k = btn.dataset.k; bag = inBag(k) ? bag.filter(x => x !== k) : [...bag, k];
+    store.set('or.bag.' + BOOK.id, bag); renderBag(); render(btn);
+  };
+}
+function place(btn){
+  const r = btn.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, vw = innerWidth, vh = innerHeight, m = 12;
+  let left = Math.min(Math.max(m, r.left + r.width / 2 - pw / 2), vw - pw - m);
+  let top = r.bottom + 10;
+  if(top + ph > vh - m) top = r.top - ph - 10;
+  if(top < m) top = Math.max(m, vh - ph - m);
+  pop.style.left = left + 'px'; pop.style.top = top + 'px';
+}
+function openWord(btn){
+  $('#tip').classList.add('gone');
+  document.querySelectorAll('.hit.on,.hit.sent').forEach(h => h.classList.remove('on', 'sent'));
+  btn.parentElement.querySelectorAll(`.hit[data-s="${btn.dataset.s}"]`).forEach(h => h.classList.add(h.dataset.k === btn.dataset.k ? 'on' : 'sent'));
+  active = btn; showSent = false; pop.hidden = false; render(btn); place(btn);
+}
+function closePop(){ pop.hidden = true; active = null; document.querySelectorAll('.hit.on,.hit.sent').forEach(h => h.classList.remove('on', 'sent')); }
+pop.addEventListener('click', e => e.stopPropagation());
+$('#drawer').addEventListener('click', e => e.stopPropagation());
+document.addEventListener('click', () => { if(active) closePop(); });
+
+/* ---------- languages & hints ---------- */
+function syncLangs(){ document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', langs.includes(c.dataset.lang))); }
+document.querySelectorAll('.chip').forEach(c => c.onclick = e => {
+  e.stopPropagation(); const l = c.dataset.lang;
+  if(langs.includes(l)){ if(langs.length === 1) return; langs = langs.filter(x => x !== l); }
+  else langs = ['en','ky','ru'].filter(x => x === l || langs.includes(x));
+  store.set('or.langs', langs); syncLangs(); if(active){ render(active); place(active); }
+});
+function syncHints(){ $('#book').classList.toggle('hints', hints); $('#hintBtn').setAttribute('aria-pressed', hints); }
+$('#hintBtn').onclick = () => { hints = !hints; store.set('or.hints', hints); syncHints(); };
+
+/* ---------- bag ---------- */
+function renderBag(){
+  $('#bagCount').textContent = bag.length;
+  const ul = $('#bagList');
+  if(!bag.length){ ul.innerHTML = `<li class="empty">Çantan boş. Bir kelimeye dokun ve ★ ile ekle.</li>`; return; }
+  ul.innerHTML = bag.map(k => { const g = BOOK.gloss[k]; return `<li><b>${g.w}</b><small>${langs.map(l => g[l]).join(' · ')}</small><button data-rm="${k}">Çıkar</button></li>`; }).join('');
+  ul.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { bag = bag.filter(x => x !== b.dataset.rm); store.set('or.bag.' + BOOK.id, bag); renderBag(); });
+}
+function openBag(){ closePop(); renderBag(); $('#drawer').hidden = false; $('#scrim').hidden = false; }
+function closeBag(){ $('#drawer').hidden = true; $('#scrim').hidden = true; }
+$('#bagBtn').onclick = e => { e.stopPropagation(); openBag(); };
+$('#bagClose').onclick = closeBag; $('#scrim').onclick = closeBag;
+
+/* ---------- fullscreen (optional) ---------- */
+$('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } }catch(e){} };
+if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
+
+route();
+</script>
+
+</body>
+</html>

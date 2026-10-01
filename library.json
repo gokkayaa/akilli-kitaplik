@@ -1,0 +1,40 @@
+{
+ "shelves": [
+  {
+   "id": "7",
+   "title": "7. Sınıf",
+   "sub": "A1.3 · 10+ yaş",
+   "note": "5'ten 7'ye ve 6'dan 7'ye geçen sınıflar",
+   "books": [
+    {
+     "id": "lunapark-macerasi",
+     "no": 1,
+     "title": "Lunapark Macerası",
+     "ready": true,
+     "pages": 32
+    },
+    {
+     "id": "bir-hayalim-var",
+     "no": 2,
+     "title": "Bir Hayalim Var",
+     "ready": false,
+     "pages": 32
+    },
+    {
+     "id": "fistiklar-kimin",
+     "no": 3,
+     "title": "Fıstıklar Kimin?",
+     "ready": false,
+     "pages": 32
+    },
+    {
+     "id": "istanbulda-bir-gun",
+     "no": 4,
+     "title": "İstanbul'da Bir Gün",
+     "ready": false,
+     "pages": 32
+    }
+   ]
+  }
+ ]
+}
