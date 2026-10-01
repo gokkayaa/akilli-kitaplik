@@ -111,7 +111,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .nav{display:flex;justify-content:center;align-items:center;gap:14px;padding-block:8px 12px}
 .nav button{border:1px solid var(--line);background:var(--card);width:46px;height:46px;border-radius:50%;font-size:1.4rem;font-weight:800;line-height:1}
 .nav button:disabled{opacity:.35;cursor:default}
-.nav output{font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink-soft);min-width:84px;text-align:center}
+.nav #pno{width:auto;min-width:104px;height:46px;border-radius:999px;font-size:1rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums;padding:0 14px}
 .tip{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font-weight:800;box-shadow:var(--shadow);z-index:3;white-space:nowrap;font-size:.95rem;transition:opacity .4s}
 .tip.gone{opacity:0;pointer-events:none}
 
@@ -197,6 +197,17 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .qz-btn.main{background:#00adb9;color:#05292c}
 .qz-btn.alt{background:var(--desk-2)}
 .stars{font-size:2.2rem;text-align:center;margin:8px 0 0;letter-spacing:.1em}
+.qz.wide{width:min(760px,100%)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:14px}
+.pg{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:4px;display:flex;flex-direction:column;gap:4px;align-items:center;font-weight:800;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.pg img{width:100%;aspect-ratio:680/624;object-fit:cover;border-radius:6px;display:block}
+.pg.on{border-color:#00adb9;color:var(--teal-deep);background:var(--teal-wash)}
+.pg:hover{border-color:#00adb9}
+.choose{display:grid;gap:10px;margin-top:16px}
+.choose .qz-btn{padding:14px 18px;font-size:1.05rem;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.cover-sm{width:84px;border-radius:4px 10px 10px 4px;box-shadow:0 8px 16px -10px rgba(10,50,55,.6);flex:none}
+#pno{cursor:pointer;border-radius:999px;padding:6px 10px;background:var(--card);border:1px solid var(--line)}
+#pno:hover{border-color:#00adb9}
 .back-q{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:5;border:0;background:#00adb9;color:#05292c;border-radius:999px;padding:10px 18px;font-weight:800;box-shadow:var(--shadow)}
 .hit.proof{background:rgba(255,212,59,.45);box-shadow:inset 0 -3px 0 #e0b100}
 @media (max-width:560px){.qz-q p{font-size:1.15rem}.opt{font-size:1.05rem;padding:10px 6px}.opt img{width:60px;height:60px}.qz-opts.row3{gap:6px}.slots{grid-template-columns:repeat(2,minmax(0,1fr))}.ava{width:52px;height:52px}}
@@ -240,7 +251,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
   </main>
   <nav class="nav" aria-label="Sayfalar">
     <button id="prev" aria-label="Önceki sayfa">‹</button>
-    <output id="pno"></output>
+    <button id="pno" title="Sayfa seç" aria-label="Sayfa seç"></button>
     <button id="next" aria-label="Sonraki sayfa">›</button>
   </nav>
 </div>
@@ -280,7 +291,7 @@ function renderLib(){
       <div class="shelf-h"><h2 id="sh-${sh.id}">${sh.title}</h2><span class="lvl">${sh.sub}</span><small>${sh.note || ''}</small></div>
       <div class="row">${sh.books.map(b => bookCard(b)).join('')}</div>
     </section>`).join('');
-  wall.querySelectorAll('.bk.ready').forEach(el => el.onclick = () => { location.hash = el.dataset.id; });
+  wall.querySelectorAll('.bk.ready').forEach(el => el.onclick = () => chooseStart(el.dataset.id));
 }
 function bookCard(b){
   const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
@@ -291,6 +302,22 @@ function bookCard(b){
     ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star" title="Kelime Defterim">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
   </button>`;
 }
+
+function chooseStart(id){
+  const b = LIB.shelves.flatMap(s => s.books).find(x => x.id === id), last = store.get('or.page.' + id, 0);
+  if(!last || last <= 1){ store.set('or.page.' + id, 1); location.hash = id; return; }
+  $('#qz').className = 'qz';
+  $('#qz').innerHTML = `
+    <div class="qz-h"><img class="cover-sm" src="books/${id}/cover.jpg" alt=""><div class="qz-who"><b>${b.title}</b><small>Kaldığın yer: s. ${last}</small></div></div>
+    <div class="choose">
+      <button class="qz-btn main" data-go="cont">Kaldığın yerden devam et <span>s. ${last} ›</span></button>
+      <button class="qz-btn alt" data-go="start">Baştan başla <span>⏮</span></button>
+    </div>`;
+  $('#qzScrim').hidden = false;
+  $('#qz').querySelector('[data-go="cont"]').onclick = () => { $('#qzScrim').hidden = true; location.hash = id; };
+  $('#qz').querySelector('[data-go="start"]').onclick = () => { $('#qzScrim').hidden = true; store.set('or.page.' + id, 1); location.hash = id; };
+}
+$('#qzScrim').addEventListener('click', e => { if(e.target === $('#qzScrim') && !QS){ $('#qzScrim').hidden = true; } });
 
 /* ---------- routing ---------- */
 async function route(){
@@ -377,6 +404,17 @@ function go(d){
   if(n < 1 || n > N) return;
   cur = n; draw();
 }
+$('#pno').onclick = e => {
+  e.stopPropagation(); closePop();
+  const pages = spreadOf(cur), N = BOOK.pages.length;
+  $('#qz').className = 'qz wide';
+  $('#qz').innerHTML = `
+    <div class="qz-h"><div class="qz-who"><b>Sayfa seç</b><small>${BOOK.title}</small></div><button class="round" data-x aria-label="Kapat">✕</button></div>
+    <div class="pgrid">${BOOK.pages.map(p => `<button class="pg ${pages.includes(p.no) ? 'on' : ''}" data-n="${p.no}"><img src="books/${BOOK.id}/t-${String(p.no).padStart(2,'0')}.jpg" alt="" loading="lazy">${p.no === 1 ? 'Kapak' : p.no}</button>`).join('')}</div>`;
+  $('#qzScrim').hidden = false;
+  $('#qz').querySelector('[data-x]').onclick = () => { $('#qzScrim').hidden = true; };
+  $('#qz').querySelectorAll('.pg').forEach(b => b.onclick = () => { $('#qzScrim').hidden = true; cur = +b.dataset.n; draw(); });
+};
 $('#prev').onclick = () => go(-1);
 $('#next').onclick = () => go(1);
 document.addEventListener('keydown', e => {
@@ -489,7 +527,7 @@ function pendingFor(pages){
 const SCORABLE = t => ['mc','tf','who','order'].includes(t);
 let sessionStars = new Set();
 function giveStar(q){ sessionStars.add(q.id); }
-function startQuiz(list, done){ closePop(); QS = {list, i:0, done, st:{}}; showQ(); }
+function startQuiz(list, done){ closePop(); $('#qz').className = 'qz'; QS = {list, i:0, done, st:{}}; showQ(); }
 function shuffle(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function showQ(){
   const q = QS.list[QS.i], host = BOOK.host || {name:'', face:''};
@@ -569,15 +607,17 @@ function findInBook(q){
 }
 $('#backQ').onclick = () => { $('#backQ').hidden = true; if(returnTo){ cur = returnTo; returnTo = null; draw(); } if(QS) showQ(); };
 function finishCard(){
+  $('#qz').className = 'qz';
   const total = BOOK.quiz.filter(q => SCORABLE(q.type)).length, got = sessionStars.size;
   const host = BOOK.host || {};
   $('#qz').innerHTML = `
     <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="">` : ''}<div class="qz-who"><b>Tebrikler!</b><small>Kitabı bitirdin.</small></div></div>
     <p class="stars" aria-label="${got} / ${total}">${'⭐'.repeat(got)}${'☆'.repeat(Math.max(0, total - got))}</p>
     <p class="qz-fb">${got} / ${total}</p>
-    <div class="qz-foot"><button class="qz-btn alt" data-close>Kapat</button><button class="qz-btn main" data-shelf>Rafa dön</button></div>`;
+    <div class="qz-foot"><button class="qz-btn alt" data-close>Kapat</button><button class="qz-btn alt" data-again>⏮ Baştan oku</button><button class="qz-btn main" data-shelf>Rafa dön</button></div>`;
   $('#qzScrim').hidden = false;
   $('#qz').querySelector('[data-close]').onclick = () => { $('#qzScrim').hidden = true; draw(); };
+  $('#qz').querySelector('[data-again]').onclick = () => { $('#qzScrim').hidden = true; quizDone = new Set(); sessionStars = new Set(); cur = 1; draw(); };
   $('#qz').querySelector('[data-shelf]').onclick = () => { $('#qzScrim').hidden = true; location.hash = ''; };
 }
 $('#qz').addEventListener('click', e => e.stopPropagation());
