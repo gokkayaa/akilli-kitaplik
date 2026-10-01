@@ -121,6 +121,16 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .note{margin:4px 0 0;color:var(--ink-soft);font-weight:700;font-size:.88rem}
 .cog{display:inline-flex;gap:6px;align-items:center;margin-top:8px;background:rgba(255,212,59,.28);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:800}
 .tr{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.wrow{display:flex;gap:12px;align-items:flex-start}
+.wrow .tr{flex:1;min-width:0}
+.wpic{width:96px;height:96px;border-radius:14px;object-fit:cover;flex:none;margin-top:12px;border:1px solid var(--line);background:#fff}
+.bag li.pic{grid-template-columns:auto 1fr auto}
+.bag li img{grid-row:1/span 2;width:44px;height:44px;border-radius:10px;object-fit:cover}
+.bag li.pic small{grid-column:2}
+.bag li.pic button{grid-column:3}
+.clear{margin-top:12px;border:1px solid var(--line);background:var(--desk);border-radius:12px;padding:10px;font-weight:800;color:var(--ink-soft)}
+.clear.sure{background:#d9534f;border-color:#d9534f;color:#fff}
+@media (max-width:560px){.wpic{width:72px;height:72px}}
 .tr li{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:baseline}
 .tr .lb{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-deep)}
 .tr .tx{font-size:1.08rem;font-weight:700;min-width:0;overflow-wrap:anywhere}
@@ -217,7 +227,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
       </div>
       <button class="tbtn" id="hintBtn">İpucu</button>
       <button class="tbtn" id="quizBtn" title="Haydi, cevapla! soruları">Sorular</button>
-      <button class="tbtn" id="bagBtn">Çantam <span class="count" id="bagCount">0</span></button>
+      <button class="tbtn" id="bagBtn">Defterim <span class="count" id="bagCount">0</span></button>
       <button class="tbtn" id="fsBtn" title="Tam ekran" aria-label="Tam ekran">⛶</button>
     </div>
   </header>
@@ -236,10 +246,11 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 <div class="pop" id="pop" hidden role="dialog" aria-label="Kelime"></div>
 <div class="qz-scrim" id="qzScrim" hidden><div class="qz" id="qz" role="dialog" aria-label="Haydi, cevapla!"></div></div>
 <div class="scrim" id="scrim" hidden></div>
-<aside class="drawer" id="drawer" hidden aria-label="Kelime çantam">
-  <div class="dh"><h2>Kelime çantam</h2><button class="round" id="bagClose" aria-label="Kapat">✕</button></div>
+<aside class="drawer" id="drawer" hidden aria-label="Kelime Defterim">
+  <div class="dh"><h2>Kelime Defterim</h2><button class="round" id="bagClose" aria-label="Kapat">✕</button></div>
   <p>Dokun, öğren, topla!</p>
   <ul class="bag" id="bagList"></ul>
+  <button class="clear" id="bagClear" hidden>Temizle</button>
 </aside>
 
 <script>
@@ -272,11 +283,10 @@ function renderLib(){
 function bookCard(b){
   const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
   const pct = b.ready ? Math.round(Math.min(last, b.pages) / b.pages * 100) : 0;
-  const st = Object.keys(store.get('or.stars.' + b.id, {})).length;
   return `<button class="bk ${b.ready ? 'ready' : 'soon'}" data-id="${b.id}" ${b.ready ? '' : 'aria-disabled="true" tabindex="-1"'}>
     <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy"></div>
     <div class="bt"><span>${b.no}</span>${b.title}</div>
-    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star">★ ${words}</span>` : ''}${b.quiz && st ? `<span class="star">⭐ ${st}/${b.quiz}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
+    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star" title="Kelime Defterim">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
   </button>`;
 }
 
@@ -301,7 +311,7 @@ async function openBook(meta){
   $('#rTitle').textContent = BOOK.title; document.title = BOOK.title + ' · Okuma Rafı';
   bag = store.get('or.bag.' + BOOK.id, []);
   cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
-  quizDone = new Set(); $('#backQ').hidden = true;
+  quizDone = new Set(); sessionStars = new Set(); $('#backQ').hidden = true;
   renderBag(); syncLangs(); syncHints(); syncQuiz(); layout();
   const tip = $('#tip'); tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
 }
@@ -399,10 +409,10 @@ function render(btn){
     <div class="pop-h"><h2 class="pop-w">${g.w}</h2>${spk}<button class="round" data-x aria-label="Kapat">✕</button></div>
     <p class="note">${g.tr}</p>
     ${g.cog ? `<span class="cog">★ Kırgızcada da var: ${g.cog}</span>` : ''}
-    ${trList(g)}
+    <div class="wrow">${trList(g)}${g.img ? `<img class="wpic" src="books/${BOOK.id}/${g.img}" alt="${g.w}">` : ''}</div>
     <div class="acts">
       <button class="act" data-sent aria-pressed="${showSent}">Cümleyi çevir</button>
-      <button class="act ${inBag(btn.dataset.k) ? 'done' : ''}" data-bag>${inBag(btn.dataset.k) ? '✓ Çantada' : '★ Çantama ekle'}</button>
+      <button class="act ${inBag(btn.dataset.k) ? 'done' : ''}" data-bag>${inBag(btn.dataset.k) ? '✓ Defterde' : '★ Deftere ekle'}</button>
     </div>
     ${showSent ? `<div class="sentbox"><div class="tq"><span>${s.tr}</span>${trVoice ? '<button class="round say" data-say="s" aria-label="Cümleyi dinle">🔊</button>' : ''}</div>${trList(s)}</div>` : ''}`;
   pop.querySelector('[data-x]').onclick = closePop;
@@ -447,14 +457,20 @@ $('#hintBtn').onclick = () => { hints = !hints; store.set('or.hints', hints); sy
 function renderBag(){
   $('#bagCount').textContent = bag.length;
   const ul = $('#bagList');
-  if(!bag.length){ ul.innerHTML = `<li class="empty">Çantan boş. Bir kelimeye dokun ve ★ ile ekle.</li>`; return; }
-  ul.innerHTML = bag.map(k => { const g = BOOK.gloss[k]; return `<li><b>${g.w}</b><small>${langs.map(l => g[l]).join(' · ')}</small><button data-rm="${k}">Çıkar</button></li>`; }).join('');
+  const clr = $('#bagClear'); clr.hidden = !bag.length; clr.classList.remove('sure'); clr.textContent = 'Temizle';
+  if(!bag.length){ ul.innerHTML = `<li class="empty">Defterin boş. Bir kelimeye dokun ve ★ ile ekle.</li>`; return; }
+  ul.innerHTML = bag.map(k => { const g = BOOK.gloss[k]; if(!g) return ''; return `<li class="${g.img ? 'pic' : ''}">${g.img ? `<img src="books/${BOOK.id}/${g.img}" alt="">` : ''}<b>${g.w}</b><small>${langs.map(l => g[l]).join(' · ')}</small><button data-rm="${k}">Çıkar</button></li>`; }).join('');
   ul.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { bag = bag.filter(x => x !== b.dataset.rm); store.set('or.bag.' + BOOK.id, bag); renderBag(); });
 }
 function openBag(){ closePop(); renderBag(); $('#drawer').hidden = false; $('#scrim').hidden = false; }
 function closeBag(){ $('#drawer').hidden = true; $('#scrim').hidden = true; }
 $('#bagBtn').onclick = e => { e.stopPropagation(); openBag(); };
 $('#bagClose').onclick = closeBag; $('#scrim').onclick = closeBag;
+$('#bagClear').onclick = () => {
+  const c = $('#bagClear');
+  if(!c.classList.contains('sure')){ c.classList.add('sure'); c.textContent = 'Emin misin? Evet, hepsini sil'; return; }
+  bag = []; store.set('or.bag.' + BOOK.id, bag); renderBag(); if(active) render(active);
+};
 
 /* ---------- fullscreen (optional) ---------- */
 $('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } }catch(e){} };
@@ -469,7 +485,8 @@ function pendingFor(pages){
   return BOOK.quiz.filter(q => q.after >= pages[0] && q.after <= pages[pages.length - 1] && !quizDone.has(q.id));
 }
 const SCORABLE = t => ['mc','tf','who','order'].includes(t);
-function giveStar(q){ const st = store.get('or.stars.' + BOOK.id, {}); st[q.id] = 1; store.set('or.stars.' + BOOK.id, st); }
+let sessionStars = new Set();
+function giveStar(q){ sessionStars.add(q.id); }
 function startQuiz(list, done){ closePop(); QS = {list, i:0, done, st:{}}; showQ(); }
 function shuffle(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function showQ(){
@@ -550,7 +567,7 @@ function findInBook(q){
 }
 $('#backQ').onclick = () => { $('#backQ').hidden = true; if(returnTo){ cur = returnTo; returnTo = null; draw(); } if(QS) showQ(); };
 function finishCard(){
-  const total = BOOK.quiz.filter(q => SCORABLE(q.type)).length, got = Object.keys(store.get('or.stars.' + BOOK.id, {})).length;
+  const total = BOOK.quiz.filter(q => SCORABLE(q.type)).length, got = sessionStars.size;
   const host = BOOK.host || {};
   $('#qz').innerHTML = `
     <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="">` : ''}<div class="qz-who"><b>Tebrikler!</b><small>Kitabı bitirdin.</small></div></div>
