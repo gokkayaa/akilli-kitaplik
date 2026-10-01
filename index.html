@@ -144,6 +144,50 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .bag button{grid-row:1/span 2;grid-column:2;align-self:center;border:0;background:var(--desk-2);border-radius:10px;padding:6px 10px;font-weight:800;font-size:.8rem}
 .bag .empty{display:block;border:2px dashed var(--line);border-radius:16px;padding:22px;text-align:center;color:var(--ink-soft);font-weight:700}
 
+/* quiz: Haydi, cevapla! */
+.qz-scrim{position:fixed;inset:0;z-index:40;background:rgba(5,25,27,.45);display:grid;place-items:center;padding:16px}
+.qz{position:relative;width:min(520px,100%);max-height:calc(100% - 8px);overflow:auto;background:var(--card);color:var(--ink);border-radius:24px;box-shadow:var(--shadow);padding:18px 20px 18px;animation:qzIn .35s cubic-bezier(.2,.8,.3,1.2)}
+@keyframes qzIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.qz-h{display:flex;align-items:center;gap:12px}
+.ava{width:62px;height:62px;border-radius:50%;object-fit:cover;flex:none;border:3px solid #00adb9;background:#fff}
+.qz-who{flex:1;min-width:0}
+.qz-who b{display:block;font-family:var(--f-display);font-weight:800;font-size:1.35rem;line-height:1;color:var(--teal-deep)}
+.qz-who small{font-weight:800;color:var(--ink-soft);font-size:.82rem}
+.qz-skip{border:0;background:none;color:var(--ink-soft);font-weight:800;font-size:.85rem;padding:6px 4px}
+.qz-q{display:flex;gap:10px;align-items:flex-start;margin:14px 0 6px;background:var(--desk);border-radius:18px;padding:12px 14px;position:relative}
+.qz-q::before{content:"";position:absolute;left:22px;top:-9px;border:9px solid transparent;border-top:0;border-bottom-color:var(--desk)}
+.qz-q p{margin:0;flex:1;font-family:var(--f-display);font-weight:700;font-size:1.35rem;line-height:1.2;text-wrap:balance}
+.qz-tools{display:flex;gap:6px;flex:none}
+.qz-tr{list-style:none;margin:6px 0 4px;padding:0 4px;display:grid;gap:4px}
+.qz-tr li{display:grid;grid-template-columns:84px 1fr;gap:10px;font-weight:700;font-size:.95rem}
+.qz-tr li span:first-child{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-deep);padding-top:2px}
+.qz-opts{display:grid;gap:10px;margin-top:12px}
+.qz-opts.row3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.qz-opts.row2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:12px 10px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;line-height:1.1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0;transition:transform .12s,border-color .15s,background-color .15s}
+.opt small{font-family:var(--f-body);font-size:.75rem;font-weight:700;color:var(--ink-soft);overflow-wrap:anywhere}
+.opt img{width:78px;height:78px;border-radius:50%;object-fit:cover}
+.opt:not(:disabled):hover{border-color:#00adb9;transform:translateY(-2px)}
+.opt:disabled{cursor:default}
+.opt.pick{border-color:#00adb9;background:var(--teal-wash)}
+.opt.ok{border-color:#2f9e5b;background:rgba(47,158,91,.16)}
+.opt.no{border-color:#d9534f;background:rgba(217,83,79,.14);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.slot{border:2px dashed var(--line);border-radius:14px;min-height:54px;display:grid;place-items:center;padding:6px;font-weight:800;text-align:center;font-size:.92rem;position:relative}
+.slot i{position:absolute;top:4px;left:8px;font-style:normal;font-size:.7rem;color:var(--ink-soft)}
+.slot.full{border-style:solid;border-color:#00adb9;background:var(--teal-wash)}
+.qz-fb{min-height:1.6em;margin:14px 0 0;font-family:var(--f-display);font-weight:800;font-size:1.3rem;text-align:center}
+.qz-fb.ok{color:#2f9e5b}.qz-fb.no{color:#d9534f}
+.qz-fb small{display:block;font-family:var(--f-body);font-size:.9rem;color:var(--ink-soft)}
+.qz-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}
+.qz-btn{border:0;border-radius:999px;padding:10px 18px;font-weight:800;font-size:.95rem}
+.qz-btn.main{background:#00adb9;color:#05292c}
+.qz-btn.alt{background:var(--desk-2)}
+.stars{font-size:2.2rem;text-align:center;margin:8px 0 0;letter-spacing:.1em}
+.back-q{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:5;border:0;background:#00adb9;color:#05292c;border-radius:999px;padding:10px 18px;font-weight:800;box-shadow:var(--shadow)}
+.hit.proof{background:rgba(255,212,59,.45);box-shadow:inset 0 -3px 0 #e0b100}
+@media (max-width:560px){.qz-q p{font-size:1.15rem}.opt{font-size:1.05rem;padding:10px 6px}.opt img{width:60px;height:60px}.qz-opts.row3{gap:6px}.slots{grid-template-columns:repeat(2,minmax(0,1fr))}.ava{width:52px;height:52px}}
 @media (max-width:560px){#fsBtn{display:none}.rtitle{font-size:1.15rem}.chip{padding:6px 10px}.tr li{grid-template-columns:78px 1fr}.tr .lb{font-size:.66rem}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -172,6 +216,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
         <button class="chip" id="lang-ru" data-lang="ru">RU</button>
       </div>
       <button class="tbtn" id="hintBtn">İpucu</button>
+      <button class="tbtn" id="quizBtn" title="Haydi, cevapla! soruları">Sorular</button>
       <button class="tbtn" id="bagBtn">Çantam <span class="count" id="bagCount">0</span></button>
       <button class="tbtn" id="fsBtn" title="Tam ekran" aria-label="Tam ekran">⛶</button>
     </div>
@@ -179,6 +224,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
   <main class="stage" id="stage">
     <div class="book" id="book"></div>
     <div class="tip gone" id="tip">Haydi, kelimeye dokun!</div>
+    <button class="back-q" id="backQ" hidden>‹ Soruya dön</button>
   </main>
   <nav class="nav" aria-label="Sayfalar">
     <button id="prev" aria-label="Önceki sayfa">‹</button>
@@ -188,6 +234,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 </div>
 
 <div class="pop" id="pop" hidden role="dialog" aria-label="Kelime"></div>
+<div class="qz-scrim" id="qzScrim" hidden><div class="qz" id="qz" role="dialog" aria-label="Haydi, cevapla!"></div></div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="Kelime çantam">
   <div class="dh"><h2>Kelime çantam</h2><button class="round" id="bagClose" aria-label="Kapat">✕</button></div>
@@ -225,10 +272,11 @@ function renderLib(){
 function bookCard(b){
   const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
   const pct = b.ready ? Math.round(Math.min(last, b.pages) / b.pages * 100) : 0;
+  const st = Object.keys(store.get('or.stars.' + b.id, {})).length;
   return `<button class="bk ${b.ready ? 'ready' : 'soon'}" data-id="${b.id}" ${b.ready ? '' : 'aria-disabled="true" tabindex="-1"'}>
     <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy"></div>
     <div class="bt"><span>${b.no}</span>${b.title}</div>
-    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
+    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star">★ ${words}</span>` : ''}${b.quiz && st ? `<span class="star">⭐ ${st}/${b.quiz}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
   </button>`;
 }
 
@@ -253,7 +301,8 @@ async function openBook(meta){
   $('#rTitle').textContent = BOOK.title; document.title = BOOK.title + ' · Okuma Rafı';
   bag = store.get('or.bag.' + BOOK.id, []);
   cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
-  renderBag(); syncLangs(); syncHints(); layout();
+  quizDone = new Set(); $('#backQ').hidden = true;
+  renderBag(); syncLangs(); syncHints(); syncQuiz(); layout();
   const tip = $('#tip'); tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
 }
 function spreadOf(n){
@@ -281,7 +330,10 @@ function draw(){
   bookEl.style.height = h + 'px';
   const N = BOOK.pages.length;
   $('#pno').textContent = pages.length === 2 ? `${pages[0]}–${pages[1]} / ${N}` : `${pages[0]} / ${N}`;
-  $('#prev').disabled = pages[0] <= 1; $('#next').disabled = pages[pages.length - 1] >= N;
+  $('#prev').disabled = pages[0] <= 1;
+  const endQ = pages[pages.length - 1] >= N ? pendingFor(pages) : [];
+  $('#next').disabled = pages[pages.length - 1] >= N && !endQ.length;
+  $('#next').textContent = pages[pages.length - 1] >= N && endQ.length ? '✓' : '›';
   store.set('or.page.' + BOOK.id, pages[pages.length - 1]);
   // preload neighbours
   [pages[0] - 2, pages[0] - 1, pages[pages.length - 1] + 1, pages[pages.length - 1] + 2].forEach(n => {
@@ -303,8 +355,13 @@ function pageEl(p){
   return pg;
 }
 function go(d){
+  if(!$('#qzScrim').hidden) return;
   const pages = spreadOf(cur), N = BOOK.pages.length;
   const n = d > 0 ? pages[pages.length - 1] + 1 : pages[0] - 1;
+  if(d > 0){
+    const q = pendingFor(pages);
+    if(q.length){ startQuiz(q, () => { if(n <= N){ cur = n; draw(); } else finishCard(); }); return; }
+  }
   if(n < 1 || n > N) return;
   cur = n; draw();
 }
@@ -402,6 +459,109 @@ $('#bagClose').onclick = closeBag; $('#scrim').onclick = closeBag;
 /* ---------- fullscreen (optional) ---------- */
 $('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } }catch(e){} };
 if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
+
+/* ---------- Haydi, cevapla! ---------- */
+let quizOn = store.get('or.quiz', true), quizDone = new Set(), QS = null;
+function syncQuiz(){ $('#quizBtn').setAttribute('aria-pressed', quizOn); $('#quizBtn').hidden = !(BOOK && BOOK.quiz && BOOK.quiz.length); }
+$('#quizBtn').onclick = () => { quizOn = !quizOn; store.set('or.quiz', quizOn); syncQuiz(); draw(); };
+function pendingFor(pages){
+  if(!quizOn || !BOOK || !BOOK.quiz) return [];
+  return BOOK.quiz.filter(q => q.after >= pages[0] && q.after <= pages[pages.length - 1] && !quizDone.has(q.id));
+}
+const SCORABLE = t => ['mc','tf','who','order'].includes(t);
+function giveStar(q){ const st = store.get('or.stars.' + BOOK.id, {}); st[q.id] = 1; store.set('or.stars.' + BOOK.id, st); }
+function startQuiz(list, done){ closePop(); QS = {list, i:0, done, st:{}}; showQ(); }
+function shuffle(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function showQ(){
+  const q = QS.list[QS.i], host = BOOK.host || {name:'', face:''};
+  const st = QS.st[q.id] || (QS.st[q.id] = {tries:0, state:'open', pick:null, order:[], tr:false, mix: q.type === 'order' ? shuffle(q.options.map((o, i) => i)) : null});
+  const qz = $('#qz'), trOn = st.tr;
+  const trBlock = o => o ? `<ul class="qz-tr">${langs.map(l => `<li><span>${LBL[l]}</span><span>${o[l]}</span></li>`).join('')}</ul>` : '';
+  const optSub = o => trOn && o.tt ? `<small>${langs.map(l => o.tt[l]).join(' · ')}</small>` : '';
+  let body = '';
+  if(['mc','tf','who','predict'].includes(q.type)){
+    const n = q.options.length;
+    body = `<div class="qz-opts ${n === 2 ? 'row2' : 'row3'}">${q.options.map((o, i) => {
+      let cls = '';
+      if(st.pick === i) cls = q.type === 'predict' ? 'pick' : (i === q.answer ? 'ok' : 'no');
+      if(st.state !== 'open' && q.answer === i && q.type !== 'predict') cls = 'ok';
+      return `<button class="opt ${cls}" data-i="${i}" ${st.state !== 'open' ? 'disabled' : ''}>${o.face ? `<img src="books/${BOOK.id}/${o.face}" alt="">` : ''}${o.t}${optSub(o)}</button>`;
+    }).join('')}</div>`;
+  } else if(q.type === 'order'){
+    const placed = st.state === 'revealed' ? q.options.map((o, i) => i) : st.order;
+    body = `<div class="slots">${[0,1,2,3].slice(0, q.options.length).map(k => `<div class="slot ${placed[k] !== undefined ? 'full' : ''}"><i>${k + 1}</i>${placed[k] !== undefined ? q.options[placed[k]].t : ''}</div>`).join('')}</div>
+      <div class="qz-opts row2">${st.mix.map(i => `<button class="opt ${placed.includes(i) ? 'pick' : ''}" data-i="${i}" ${placed.includes(i) || st.state !== 'open' ? 'disabled' : ''}>${q.options[i].t}${optSub(q.options[i])}</button>`).join('')}</div>`;
+  } else if(q.type === 'talk'){
+    body = `<p class="qz-fb">${q.tip || ''}${trOn && q.tipt ? `<small>${langs.map(l => q.tipt[l]).join(' · ')}</small>` : ''}</p>`;
+  }
+  let fb = '', foot = '';
+  const findBtn = q.find ? `<button class="qz-btn alt" data-find>📖 Kitapta bul</button>` : '';
+  const nextBtn = `<button class="qz-btn main" data-next>Devam ›</button>`;
+  if(q.type === 'talk'){ foot = nextBtn; }
+  else if(st.state === 'ok'){ fb = `<p class="qz-fb ok">Aferin! 🎉</p>`; foot = findBtn + nextBtn; }
+  else if(st.state === 'revealed'){ fb = `<p class="qz-fb no">Doğru cevap bu.<small>Kitapta birlikte bakalım!</small></p>`; foot = findBtn + nextBtn; }
+  else if(st.state === 'seen'){ fb = `<p class="qz-fb">Haydi, okuyalım ve görelim!</p>`; foot = nextBtn; }
+  else if(st.tries === 1){ fb = `<p class="qz-fb no">Bir daha dene!</p>`; }
+  const spk = trVoice ? `<button class="round say" data-say aria-label="Dinle">🔊</button>` : '';
+  qz.innerHTML = `
+    <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="${host.name}">` : ''}
+      <div class="qz-who"><b>Haydi, cevapla!</b><small>${host.name ? host.name + ' soruyor' : ''} · ${QS.i + 1}/${QS.list.length}</small></div>
+      ${st.state === 'open' && q.type !== 'talk' ? '<button class="qz-skip" data-skip>Geç ›</button>' : ''}</div>
+    <div class="qz-q"><p>${q.q}</p><div class="qz-tools">${spk}<button class="round" data-tr aria-pressed="${trOn}" aria-label="Çevir" title="Çevir">文</button></div></div>
+    ${trOn ? trBlock(q.qt) : ''}
+    ${body}${fb}
+    ${foot ? `<div class="qz-foot">${foot}</div>` : ''}`;
+  $('#qzScrim').hidden = false;
+  qz.querySelector('[data-tr]').onclick = () => { st.tr = !st.tr; showQ(); };
+  qz.querySelector('[data-say]')?.addEventListener('click', () => say(q.q));
+  qz.querySelector('[data-skip]')?.addEventListener('click', nextQ);
+  qz.querySelector('[data-next]')?.addEventListener('click', nextQ);
+  qz.querySelector('[data-find]')?.addEventListener('click', () => findInBook(q));
+  qz.querySelectorAll('.opt:not(:disabled)').forEach(b => b.onclick = () => answer(q, st, +b.dataset.i));
+}
+function answer(q, st, i){
+  if(q.type === 'predict'){ st.pick = i; st.state = 'seen'; return showQ(); }
+  if(q.type === 'order'){
+    st.order.push(i);
+    if(st.order.length < q.options.length) return showQ();
+    const right = st.order.every((v, k) => v === k);
+    st.tries++;
+    if(right){ st.state = 'ok'; giveStar(q); }
+    else if(st.tries >= 2){ st.state = 'revealed'; }
+    else { st.order = []; }
+    return showQ();
+  }
+  st.pick = i; st.tries++;
+  if(i === q.answer){ st.state = 'ok'; giveStar(q); }
+  else if(st.tries >= 2){ st.state = 'revealed'; }
+  showQ();
+}
+function nextQ(){
+  quizDone.add(QS.list[QS.i].id);
+  if(QS.i < QS.list.length - 1){ QS.i++; return showQ(); }
+  $('#qzScrim').hidden = true; const d = QS.done; QS = null; d && d();
+}
+let returnTo = null;
+function findInBook(q){
+  $('#qzScrim').hidden = true; returnTo = cur; $('#tip').classList.add('gone');
+  cur = q.find.page; draw();
+  document.querySelectorAll(`.hit[data-s="${q.find.s}"]`).forEach(h => h.classList.add('proof'));
+  $('#backQ').hidden = false;
+}
+$('#backQ').onclick = () => { $('#backQ').hidden = true; if(returnTo){ cur = returnTo; returnTo = null; draw(); } if(QS) showQ(); };
+function finishCard(){
+  const total = BOOK.quiz.filter(q => SCORABLE(q.type)).length, got = Object.keys(store.get('or.stars.' + BOOK.id, {})).length;
+  const host = BOOK.host || {};
+  $('#qz').innerHTML = `
+    <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="">` : ''}<div class="qz-who"><b>Tebrikler!</b><small>Kitabı bitirdin.</small></div></div>
+    <p class="stars" aria-label="${got} / ${total}">${'⭐'.repeat(got)}${'☆'.repeat(Math.max(0, total - got))}</p>
+    <p class="qz-fb">${got} / ${total}</p>
+    <div class="qz-foot"><button class="qz-btn alt" data-close>Kapat</button><button class="qz-btn main" data-shelf>Rafa dön</button></div>`;
+  $('#qzScrim').hidden = false;
+  $('#qz').querySelector('[data-close]').onclick = () => { $('#qzScrim').hidden = true; draw(); };
+  $('#qz').querySelector('[data-shelf]').onclick = () => { $('#qzScrim').hidden = true; location.hash = ''; };
+}
+$('#qz').addEventListener('click', e => e.stopPropagation());
 
 route();
 </script>
