@@ -161,33 +161,29 @@
      "id": "sirin-mutfakta-bir-oyuncu-var",
      "no": 2,
      "title": "Şirin Mutfakta Bir Oyuncu Var",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     },
     {
      "id": "gunun-ilginc-fotografi",
      "no": 3,
      "title": "Günün İlginç Fotoğrafı",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     },
     {
      "id": "hey-piri",
      "no": 4,
      "title": "Hey Piri",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     },
     {
      "id": "sirin-mutfakta-resim-dersi",
      "no": 5,
      "title": "Şirin Mutfakta Resim Dersi",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     }
    ]
   },
