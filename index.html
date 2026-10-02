@@ -202,7 +202,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .qz.wide{width:min(760px,100%)}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:14px}
 .pg{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:4px;display:flex;flex-direction:column;gap:4px;align-items:center;font-weight:800;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
-.pg img{width:100%;aspect-ratio:680/624;object-fit:cover;border-radius:6px;display:block}
+.pg img{width:100%;aspect-ratio:680/624;object-fit:contain;background:var(--desk);border-radius:6px;display:block}
 .pg.on{border-color:#00adb9;color:var(--teal-deep);background:var(--teal-wash)}
 .pg:hover{border-color:#00adb9}
 .choose{display:grid;gap:10px;margin-top:16px}
@@ -346,6 +346,7 @@ async function openBook(meta){
   renderBag(); syncLangs(); syncHints(); syncQuiz(); layout();
   const tip = $('#tip'); tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
 }
+function asp(){ return BOOK.aspect ? BOOK.aspect[0] / BOOK.aspect[1] : 680.31 / 623.62; }
 function spreadOf(n){
   if(!two) return [n];
   const N = BOOK.pages.length;
@@ -356,7 +357,7 @@ function spreadOf(n){
 }
 function layout(){
   if($('#reader').hidden) return;
-  two = window.innerWidth >= 760 && window.innerWidth > window.innerHeight * 1.05;
+  two = window.innerWidth >= 760 && window.innerWidth > window.innerHeight * (BOOK && BOOK.aspect && asp() < 1 ? 1.2 * asp() * 2 * 0.62 : 1.05);
   draw();
 }
 function draw(){
@@ -365,7 +366,7 @@ function draw(){
   bookEl.innerHTML = ''; bookEl.classList.toggle('two', pages.length === 2);
   pages.forEach(n => bookEl.appendChild(pageEl(BOOK.pages[n - 1])));
   // size: fit spread inside stage
-  const ratio = 680.31 / 623.62 * pages.length;
+  const ratio = asp() * pages.length;
   const sw = stage.clientWidth, sh = stage.clientHeight;
   let h = Math.min(sh, sw / ratio);
   bookEl.style.height = h + 'px';
@@ -383,6 +384,7 @@ function draw(){
 }
 function pageEl(p){
   const pg = document.createElement('div'); pg.className = 'page';
+  if(BOOK.aspect) pg.style.aspectRatio = BOOK.aspect[0] + '/' + BOOK.aspect[1];
   pg.innerHTML = `<img src="books/${BOOK.id}/${p.img}" alt="Sayfa ${p.no}">`;
   p.words.forEach(w => {
     const b = document.createElement('button');
