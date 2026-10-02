@@ -53,25 +53,22 @@
      "id": "bilet-nerede",
      "no": 2,
      "title": "Bilet Nerede?",
-     "ready": false,
-     "pages": 24,
-     "cover": false
+     "ready": true,
+     "pages": 24
     },
     {
      "id": "sesim-sesim-guzel-sesim",
      "no": 3,
      "title": "Sesim Sesim Güzel Sesim",
-     "ready": false,
-     "pages": 24,
-     "cover": false
+     "ready": true,
+     "pages": 24
     },
     {
      "id": "kutuphanede-bir-gun",
      "no": 4,
      "title": "Kütüphanede Bir Gün",
-     "ready": false,
-     "pages": 24,
-     "cover": false
+     "ready": true,
+     "pages": 24
     }
    ]
   },
