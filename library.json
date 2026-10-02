@@ -89,25 +89,22 @@
      "id": "kucuk-dostlarimiz",
      "no": 2,
      "title": "Küçük Dostlarımız",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     },
     {
      "id": "piknige-gidiyoruz",
      "no": 3,
      "title": "Pikniğe Gidiyoruz",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     },
     {
      "id": "penceremde-bir-misafir",
      "no": 4,
      "title": "Penceremde Bir Misafir",
-     "ready": false,
-     "pages": 32,
-     "cover": false
+     "ready": true,
+     "pages": 32
     }
    ]
   },
