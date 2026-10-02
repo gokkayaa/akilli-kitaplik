@@ -79,6 +79,45 @@
    ]
   },
   {
+   "id": "5",
+   "title": "5. Sınıf",
+   "sub": "A1.2 · 9+ yaş",
+   "note": "",
+   "books": [
+    {
+     "id": "uc-uc-ucurtma",
+     "no": 1,
+     "title": "Uç Uç Uçurtma",
+     "ready": true,
+     "pages": 32
+    },
+    {
+     "id": "kucuk-dostlarimiz",
+     "no": 2,
+     "title": "Küçük Dostlarımız",
+     "ready": false,
+     "pages": 32,
+     "cover": false
+    },
+    {
+     "id": "piknige-gidiyoruz",
+     "no": 3,
+     "title": "Pikniğe Gidiyoruz",
+     "ready": false,
+     "pages": 32,
+     "cover": false
+    },
+    {
+     "id": "penceremde-bir-misafir",
+     "no": 4,
+     "title": "Penceremde Bir Misafir",
+     "ready": false,
+     "pages": 32,
+     "cover": false
+    }
+   ]
+  },
+  {
    "id": "7",
    "title": "7. Sınıf",
    "sub": "A1.3 · 10+ yaş",
