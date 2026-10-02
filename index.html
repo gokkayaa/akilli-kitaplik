@@ -38,49 +38,59 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 [hidden]{display:none!important}
 
 /* ================= LIBRARY ================= */
-#lib{min-height:100%}
-.band{background:#00adb9;color:#05292c;padding-inline:16px;padding-block:18px 56px}
-.band-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px}
-.logo{background:#fff;border-radius:16px;padding:6px 8px;flex:none;display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,60,65,.6)}
-.logo img{height:60px;width:auto;display:block}
-.band h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.9rem,4.5vw,2.8rem);line-height:.95;margin:0;letter-spacing:-.01em;color:#04282b}
-.band p{margin:4px 0 0;font-weight:700;color:#0a4246;font-size:1rem}
-.wall{max-width:1100px;margin:-36px auto 0;padding-inline:16px;padding-block:0 40px;display:grid;gap:14px}
-.shelves{display:grid;gap:34px}
-.hello{margin:0;justify-self:start;background:var(--card);color:var(--teal-deep);font-family:var(--f-display);font-weight:800;font-size:1.15rem;border-radius:999px;padding:6px 18px;box-shadow:var(--shadow)}
-.shelf{background:var(--card);border-radius:22px;padding:20px 20px 0;box-shadow:var(--shadow)}
-.shelf-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;padding-inline:4px}
-.shelf-h h2{font-family:var(--f-display);font-weight:800;font-size:1.7rem;margin:0;line-height:1}
-.lvl{background:var(--teal-wash);color:var(--teal-deep);border-radius:999px;padding:3px 12px;font-weight:800;font-size:.85rem;letter-spacing:.02em}
-.shelf-h small{color:var(--ink-soft);font-weight:700;font-size:.88rem;flex-basis:100%}
-.row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:26px 8px 0;position:relative}
-.row::after{content:"";position:absolute;left:-20px;right:-20px;bottom:0;height:16px;background:var(--plank);
-  border-top:3px solid var(--plank-edge);border-radius:0 0 22px 22px}
-.bk{display:flex;flex-direction:column;gap:10px;padding-bottom:30px;position:relative;z-index:1;border:0;background:none;text-align:left;padding-inline:0}
-.cover{position:relative;border-radius:4px 10px 10px 4px;overflow:hidden;background:#fff;
-  box-shadow:0 1px 0 rgba(0,0,0,.05),0 14px 22px -12px rgba(10,50,55,.55),inset 6px 0 0 rgba(0,0,0,.05);
-  transition:transform .25s cubic-bezier(.2,.8,.3,1.2),box-shadow .25s}
+/* Layout: wooden bookcase — compact teal header, sticky grade tabs, one wooden shelf per grade with face-out covers on planks. */
+:root{--wall:#f5efe6;--back:#f3e4cc;--back-2:#e9d4b3;--wood:#b47640;--wood-hi:#d49b62;--wood-lo:#6e4220;--label:#fffaf2;--w:clamp(118px,15.5vw,170px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wall:#101c1e;--back:#3a2a1d;--back-2:#302217;--wood:#6b4527;--wood-hi:#8a5c36;--wood-lo:#3a2312;--label:#22343a}}
+:root[data-theme="dark"]{--wall:#101c1e;--back:#3a2a1d;--back-2:#302217;--wood:#6b4527;--wood-hi:#8a5c36;--wood-lo:#3a2312;--label:#22343a}
+#lib{min-height:100%;background:var(--wall)}
+.band{background:#00adb9;color:#05292c;padding:12px 16px}
+.band-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.logo{background:#fff;border-radius:14px;padding:5px 7px;flex:none;display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,60,65,.6)}
+.logo img{height:46px;width:auto;display:block}
+.band h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,4vw,2.3rem);line-height:.95;margin:0;color:#04282b}
+.band p{margin:2px 0 0;font-weight:700;color:#0a4246;font-size:.95rem}
+.tabs{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--wall) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.tabs-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{flex:none;border:2px solid var(--teal);background:var(--card);color:var(--teal-deep);border-radius:999px;padding:6px 16px;font-family:var(--f-display);font-weight:800;font-size:1.05rem;line-height:1.1}
+.tab[aria-current="true"]{background:var(--teal);color:#05292c}
+.wall{max-width:1100px;margin:0 auto;padding:18px 16px 30px}
+.frame{background:linear-gradient(90deg,var(--wood-lo),var(--wood) 6%,var(--wood-hi) 50%,var(--wood) 94%,var(--wood-lo));border-radius:14px;padding:14px;box-shadow:0 24px 40px -22px rgba(60,30,10,.65)}
+.case{background:repeating-linear-gradient(90deg,rgba(90,50,20,.035) 0 2px,transparent 2px 11px),linear-gradient(var(--back),var(--back-2));border-radius:6px;box-shadow:inset 0 10px 18px -8px rgba(60,30,10,.45),inset 0 0 0 1px rgba(60,30,10,.25);overflow:hidden}
+.shelf{position:relative;padding:12px 0 18px;scroll-margin-top:64px}
+.shelf+.shelf{box-shadow:inset 0 1px 0 rgba(110,66,32,.12)}
+.shelf-h{display:flex;align-items:center;gap:8px;padding:0 16px}
+.plaque{background:#00adb9;color:#04282b;font-family:var(--f-display);font-weight:800;font-size:1.15rem;line-height:1;padding:6px 12px 5px;border-radius:6px;box-shadow:0 3px 0 #00747c,0 6px 10px -6px rgba(0,0,0,.4)}
+.lvl{background:var(--label);color:var(--ink-soft);border-radius:999px;padding:3px 10px;font-weight:800;font-size:.78rem}
+.row{display:flex;gap:clamp(14px,2.4vw,28px);padding:12px 18px 18px;overflow-x:auto;}
+.row::before,.row::after{content:"";flex:1 0 0}
+.row{scroll-snap-type:x proximity;scroll-padding-inline:18px;scrollbar-width:thin;position:relative;z-index:1}
+/* plank: sits right under the covers; cover height = width × 624/680 */
+.rw{position:relative}
+.rw::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18px;
+  background:linear-gradient(var(--wood-hi),var(--wood) 55%,var(--wood-lo));box-shadow:0 10px 14px -8px rgba(60,30,10,.6);z-index:0}
+.bk{flex:none;width:var(--w);display:flex;flex-direction:column;border:0;background:none;padding:0;text-align:left;scroll-snap-align:start}
+.cover{position:relative;border-radius:3px 7px 7px 3px;overflow:hidden;background:#fff;transform-origin:bottom center;
+  box-shadow:0 12px 14px -10px rgba(40,20,5,.7),inset 5px 0 0 rgba(0,0,0,.06);transition:transform .25s cubic-bezier(.2,.8,.3,1.2),box-shadow .25s}
 .cover img{display:block;width:100%;aspect-ratio:680/624;object-fit:cover}
-.cover::before{content:"";position:absolute;inset:0 auto 0 0;width:10px;background:linear-gradient(90deg,rgba(0,0,0,.12),rgba(0,0,0,0));z-index:1}
-.bk.ready:hover .cover,.bk.ready:focus-visible .cover{transform:translateY(-8px) rotate(-1deg);box-shadow:0 26px 30px -16px rgba(10,50,55,.6)}
+.cover::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:linear-gradient(90deg,rgba(0,0,0,.14),transparent);z-index:1}
+.bk.ready:hover .cover,.bk.ready:focus-visible .cover{transform:translateY(-6px) scale(1.03);box-shadow:0 22px 22px -14px rgba(40,20,5,.7)}
 .bk.soon{cursor:default}
-.ph{aspect-ratio:680/624;display:grid;place-items:center;padding:16px;background:repeating-linear-gradient(135deg,var(--desk) 0 14px,var(--desk-2) 14px 28px);text-align:center}
-.ph span{font-family:var(--f-display);font-weight:800;font-size:1.15rem;line-height:1.15;color:var(--ink-soft);background:var(--card);border-radius:12px;padding:8px 12px}
-.bk.soon .cover img{filter:saturate(.35) opacity(.75)}
-.ribbon{position:absolute;top:10px;right:-4px;background:var(--ink);color:var(--card);font-weight:800;font-size:.75rem;
-  padding:4px 10px 4px 12px;border-radius:999px 0 0 999px;z-index:2;letter-spacing:.03em}
-.bt{font-family:var(--f-display);font-weight:800;font-size:1.12rem;line-height:1.1}
-.bt span{color:var(--teal-deep);margin-right:4px}
-.meta{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
-.bar{flex:1;height:7px;border-radius:99px;background:var(--desk-2);overflow:hidden}
+.bk.soon .cover img{filter:saturate(.3) opacity(.7)}
+.ph{aspect-ratio:680/624;display:grid;place-items:center;padding:10px;background:repeating-linear-gradient(135deg,#efe6d8 0 12px,#e5d8c4 12px 24px);text-align:center}
+.ph span{font-family:var(--f-display);font-weight:800;font-size:.95rem;line-height:1.1;color:#6b5a44;background:#fffaf2;border-radius:8px;padding:6px 8px}
+.ribbon{position:absolute;top:8px;right:-3px;background:var(--ink);color:var(--card);font-weight:800;font-size:.7rem;padding:3px 8px 3px 10px;border-radius:999px 0 0 999px;z-index:2}
+.cap{margin-top:8px;flex:1;background:var(--label);border-radius:8px;padding:6px 8px 7px;box-shadow:0 2px 6px -3px rgba(60,30,10,.4);display:grid;gap:5px;min-height:62px;align-content:start}
+.bt{font-family:var(--f-display);font-weight:800;font-size:.95rem;line-height:1.1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink)}
+.bt span{color:var(--teal-deep);margin-right:3px}
+.meta{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;border-radius:99px;background:rgba(110,66,32,.15);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--teal);border-radius:99px}
-.star{background:rgba(255,212,59,.35);color:var(--ink);border-radius:99px;padding:1px 8px}
-.foot{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:0 30px;color:var(--ink-soft);font-size:.82rem;font-weight:700}
-@media (max-width:760px){.row{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
-  .row::after{display:none}
-  .bk{padding-bottom:14px;border-bottom:12px solid var(--plank)}
-  .shelf{padding-bottom:6px}
-  .logo img{height:46px}}
+.done{color:#0b7a3b}
+.star{background:rgba(255,212,59,.45);color:var(--ink);border-radius:99px;padding:0 6px}
+.hello{display:none}
+.foot{max-width:1100px;margin:0 auto;padding:0 16px 30px;color:var(--ink-soft);font-size:.82rem;font-weight:700}
+@media (max-width:760px){.frame{padding:9px;border-radius:10px}.wall{padding-inline:10px}.logo img{height:38px}.band p{font-size:.85rem}}
 
 /* ================= READER ================= */
 #reader{height:100%;display:flex;flex-direction:column;padding-inline:16px}
@@ -225,7 +235,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
       <div><h1>Akıllı Kitaplık</h1><p>Etkileşimli Türkçe okuma kitapları</p></div>
     </div>
   </header>
-  <main class="wall" id="wallWrap"><p class="hello">Haydi, birlikte okuyalım!</p><div class="shelves" id="wall"></div></main>
+  <nav class="tabs" aria-label="Sınıflar"><div class="tabs-in" id="tabs"></div></nav>
+  <main class="wall" id="wallWrap"><div class="frame"><div class="case" id="wall"></div></div></main>
   <p class="foot">Kitaplar: Türkiye Maarif Vakfı Yayınları · Türkçe Okuma Kitabı serisi</p>
 </div>
 
@@ -289,19 +300,31 @@ async function loadLib(){
 function renderLib(){
   const wall = $('#wall');
   wall.innerHTML = LIB.shelves.map(sh => `
-    <section class="shelf" aria-labelledby="sh-${sh.id}">
-      <div class="shelf-h"><h2 id="sh-${sh.id}">${sh.title}</h2><span class="lvl">${sh.sub}</span><small>${sh.note || ''}</small></div>
-      <div class="row">${sh.books.map(b => bookCard(b)).join('')}</div>
+    <section class="shelf" id="raf-${sh.id}" aria-labelledby="sh-${sh.id}">
+      <div class="shelf-h"><h2 class="plaque" id="sh-${sh.id}">${sh.title}</h2><span class="lvl">${sh.sub}</span></div>
+      <div class="rw"><div class="row">${sh.books.map(b => bookCard(b)).join('')}</div></div>
     </section>`).join('');
-  wall.querySelectorAll('.bk.ready').forEach(el => el.onclick = () => chooseStart(el.dataset.id));
+  wall.querySelectorAll('.bk.ready').forEach(el => el.onclick = () => { store.set('or.grade', el.closest('.shelf').id); chooseStart(el.dataset.id); });
+  const tabs = $('#tabs');
+  tabs.innerHTML = LIB.shelves.map(sh => `<button class="tab" data-to="raf-${sh.id}">${sh.title}</button>`).join('');
+  const mark = id => tabs.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-current', t.dataset.to === id));
+  tabs.querySelectorAll('.tab').forEach(t => t.onclick = () => { store.set('or.grade', t.dataset.to); mark(t.dataset.to); document.getElementById(t.dataset.to).scrollIntoView({behavior:'smooth', block:'start'}); });
+  if(window.IntersectionObserver){
+    const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) mark(e.target.id); }), {rootMargin:'-45% 0px -50% 0px'});
+    wall.querySelectorAll('.shelf').forEach(s => io.observe(s));
+  }
+  const g = store.get('or.grade', null);
+  if(g && document.getElementById(g)){ mark(g); requestAnimationFrame(() => document.getElementById(g).scrollIntoView({block:'start'})); }
+  else mark('raf-' + LIB.shelves[0].id);
 }
 function bookCard(b){
   const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
   const pct = b.ready ? Math.round(Math.min(last, b.pages) / b.pages * 100) : 0;
+  const status = !last ? 'Başla' : pct >= 100 ? '<span class="done">✓ Bitti</span>' : 's. ' + last;
   return `<button class="bk ${b.ready ? 'ready' : 'soon'}" data-id="${b.id}" ${b.ready ? '' : 'aria-disabled="true" tabindex="-1"'}>
     <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}${b.cover === false ? `<div class="ph"><span>${b.title}</span></div>` : `<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy">`}</div>
-    <div class="bt"><span>${b.no}</span>${b.title}</div>
-    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star" title="Kelime Defterim">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
+    <div class="cap"><div class="bt"><span>${b.no}</span>${b.title}</div>
+    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div>${status}${words ? `<span class="star" title="Kelime Defterim">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}</div>
   </button>`;
 }
 
