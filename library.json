@@ -131,21 +131,21 @@
      "id": "bir-hayalim-var",
      "no": 2,
      "title": "Bir Hayalim Var",
-     "ready": false,
+     "ready": true,
      "pages": 32
     },
     {
      "id": "fistiklar-kimin",
      "no": 3,
      "title": "Fıstıklar Kimin?",
-     "ready": false,
+     "ready": true,
      "pages": 32
     },
     {
      "id": "istanbulda-bir-gun",
      "no": 4,
      "title": "İstanbul'da Bir Gün",
-     "ready": false,
+     "ready": true,
      "pages": 32
     }
    ]
