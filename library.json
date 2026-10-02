@@ -1,6 +1,45 @@
 {
  "shelves": [
   {
+   "id": "3",
+   "title": "3. Sınıf",
+   "sub": "A1 öncesi · 7+ yaş",
+   "note": "",
+   "books": [
+    {
+     "id": "kitapta-bir-fare-var",
+     "no": 1,
+     "title": "Kitapta Bir Fare Var",
+     "ready": true,
+     "pages": 24
+    },
+    {
+     "id": "leyla-ile-lale",
+     "no": 2,
+     "title": "Leyla İle Lale",
+     "ready": false,
+     "pages": 24,
+     "cover": false
+    },
+    {
+     "id": "bir-ilkbahar-gunu",
+     "no": 3,
+     "title": "Bir İlkbahar Günü",
+     "ready": false,
+     "pages": 24,
+     "cover": false
+    },
+    {
+     "id": "leyla-ve-arkadaslari-mutfakta",
+     "no": 4,
+     "title": "Leyla ve Arkadaşları Mutfakta",
+     "ready": false,
+     "pages": 24,
+     "cover": false
+    }
+   ]
+  },
+  {
    "id": "7",
    "title": "7. Sınıf",
    "sub": "A1.3 · 10+ yaş",

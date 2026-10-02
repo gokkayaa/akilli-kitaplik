@@ -64,6 +64,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .cover::before{content:"";position:absolute;inset:0 auto 0 0;width:10px;background:linear-gradient(90deg,rgba(0,0,0,.12),rgba(0,0,0,0));z-index:1}
 .bk.ready:hover .cover,.bk.ready:focus-visible .cover{transform:translateY(-8px) rotate(-1deg);box-shadow:0 26px 30px -16px rgba(10,50,55,.6)}
 .bk.soon{cursor:default}
+.ph{aspect-ratio:680/624;display:grid;place-items:center;padding:16px;background:repeating-linear-gradient(135deg,var(--desk) 0 14px,var(--desk-2) 14px 28px);text-align:center}
+.ph span{font-family:var(--f-display);font-weight:800;font-size:1.15rem;line-height:1.15;color:var(--ink-soft);background:var(--card);border-radius:12px;padding:8px 12px}
 .bk.soon .cover img{filter:saturate(.35) opacity(.75)}
 .ribbon{position:absolute;top:10px;right:-4px;background:var(--ink);color:var(--card);font-weight:800;font-size:.75rem;
   padding:4px 10px 4px 12px;border-radius:999px 0 0 999px;z-index:2;letter-spacing:.03em}
@@ -297,7 +299,7 @@ function bookCard(b){
   const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
   const pct = b.ready ? Math.round(Math.min(last, b.pages) / b.pages * 100) : 0;
   return `<button class="bk ${b.ready ? 'ready' : 'soon'}" data-id="${b.id}" ${b.ready ? '' : 'aria-disabled="true" tabindex="-1"'}>
-    <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy"></div>
+    <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}${b.cover === false ? `<div class="ph"><span>${b.title}</span></div>` : `<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy">`}</div>
     <div class="bt"><span>${b.no}</span>${b.title}</div>
     ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div><span>${last ? 's. ' + last : 'Başla'}</span>${words ? `<span class="star" title="Kelime Defterim">★ ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}
   </button>`;
