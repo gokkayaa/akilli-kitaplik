@@ -17,25 +17,22 @@
      "id": "leyla-ile-lale",
      "no": 2,
      "title": "Leyla İle Lale",
-     "ready": false,
-     "pages": 24,
-     "cover": false
+     "ready": true,
+     "pages": 24
     },
     {
      "id": "bir-ilkbahar-gunu",
      "no": 3,
      "title": "Bir İlkbahar Günü",
-     "ready": false,
-     "pages": 24,
-     "cover": false
+     "ready": true,
+     "pages": 24
     },
     {
      "id": "leyla-ve-arkadaslari-mutfakta",
      "no": 4,
      "title": "Leyla ve Arkadaşları Mutfakta",
-     "ready": false,
-     "pages": 24,
-     "cover": false
+     "ready": true,
+     "pages": 24
     }
    ]
   },
