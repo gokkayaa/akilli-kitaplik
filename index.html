@@ -542,11 +542,12 @@ function showQ(){
   let body = '';
   if(['mc','tf','who','predict'].includes(q.type)){
     const n = q.options.length;
+    const allFaces = q.options.every(o => o.face);  // pictures only when every option has one
     body = `<div class="qz-opts ${n === 2 ? 'row2' : 'row3'}">${q.options.map((o, i) => {
       let cls = '';
       if(st.pick === i) cls = q.type === 'predict' ? 'pick' : (i === q.answer ? 'ok' : 'no');
       if(st.state !== 'open' && q.answer === i && q.type !== 'predict') cls = 'ok';
-      return `<button class="opt ${cls}" data-i="${i}" ${st.state !== 'open' ? 'disabled' : ''}>${o.face ? `<img src="books/${BOOK.id}/${o.face}" alt="">` : ''}${o.t}${optSub(o)}</button>`;
+      return `<button class="opt ${cls}" data-i="${i}" ${st.state !== 'open' ? 'disabled' : ''}>${allFaces ? `<img src="books/${BOOK.id}/${o.face}" alt="">` : ''}${o.t}${optSub(o)}</button>`;
     }).join('')}</div>`;
   } else if(q.type === 'order'){
     const placed = st.state === 'revealed' ? q.options.map((o, i) => i) : st.order;
