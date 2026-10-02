@@ -224,6 +224,54 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .hit.proof{background:rgba(255,212,59,.45);box-shadow:inset 0 -3px 0 #e0b100}
 @media (max-width:560px){.qz-q p{font-size:1.15rem}.opt{font-size:1.05rem;padding:10px 6px}.opt img{width:60px;height:60px}.qz-opts.row3{gap:6px}.slots{grid-template-columns:repeat(2,minmax(0,1fr))}.ava{width:52px;height:52px}}
 @media (max-width:560px){#fsBtn{display:none}.rtitle{font-size:1.15rem}.chip{padding:6px 10px}.tr li{grid-template-columns:78px 1fr}.tr .lb{font-size:.66rem}}
+
+/* ================= TEACHER MODE ================= */
+#teachBtn[aria-pressed="true"]{background:#00adb9;border-color:#00adb9;color:#05292c}
+.ttools{display:none;gap:2px;background:var(--desk-2);border-radius:999px;padding:3px}
+.teach .ttools{display:flex}
+.tt{border:0;background:transparent;border-radius:999px;padding:6px 11px;font-weight:800;font-size:.88rem;color:var(--ink-soft);white-space:nowrap}
+.tt[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 2px 6px -3px rgba(0,0,0,.4)}
+.tt.pen[aria-pressed="true"]{color:#d6336c}.tt.hl[aria-pressed="true"]{color:#b08900}.tt.veil[aria-pressed="true"]{color:var(--teal-deep)}
+.teach #bagBtn,.teach .seg,.teach #tip{display:none!important}
+.teach .rbar{padding-block:8px 6px}
+.teach #reader{padding-inline:8px}
+.teach .nav{position:fixed;inset:auto 0 10px 0;padding:0;pointer-events:none;z-index:6}
+.teach .nav #pno{pointer-events:auto;opacity:.85}
+.teach .nav #prev,.teach .nav #next{pointer-events:auto;position:fixed;top:50%;transform:translateY(-50%);width:64px;height:64px;font-size:2rem;opacity:.8;box-shadow:var(--shadow)}
+.teach .nav #prev{left:6px}.teach .nav #next{right:6px}
+.teach .stage{padding-bottom:58px}
+.ink{position:absolute;inset:0;z-index:4;pointer-events:none;touch-action:none}
+.drawing .ink{pointer-events:auto;cursor:crosshair}
+.book{position:relative}
+.hit.veiled{background:#00adb9!important;box-shadow:inset 0 0 0 2px #00747c!important;border-radius:6px;outline:0!important}
+.hit.veiled::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:#04282b;font-family:var(--f-display);font-weight:800;font-size:clamp(.8rem,1.6vw,1.4rem)}
+.veiling .hit{cursor:pointer}
+.veiling .hit:hover{background:rgba(0,173,185,.35)}
+/* bigger cards on the board */
+.teach .pop{width:min(560px,calc(100vw - 24px));padding:18px 22px}
+.teach .pop-w{font-size:2.6rem}
+.teach .note{font-size:1.05rem}
+.teach .tr li{grid-template-columns:120px 1fr}
+.teach .tr .lb{font-size:.9rem}
+.teach .tr .tx{font-size:1.6rem}
+.teach .wpic{width:140px;height:140px}
+.teach .sentbox .tq{font-size:1.5rem}
+.teach .sentbox .tr .tx{font-size:1.25rem}
+.teach .qz{width:min(900px,100%);padding:24px 28px}
+.teach .qz.wide{width:min(980px,100%)}
+.teach .qz-q p{font-size:2rem}
+.teach .ava{width:84px;height:84px}
+.teach .qz-who b{font-size:1.7rem}
+.teach .opt{font-size:1.7rem;padding:16px 12px;position:relative}
+.teach .opt img{width:110px;height:110px}
+.teach .qz-tr li{font-size:1.2rem;grid-template-columns:110px 1fr}
+.teach .slot{font-size:1.2rem;min-height:70px}
+.teach .qz-fb{font-size:1.8rem}
+.teach .qz-btn{font-size:1.15rem;padding:12px 22px}
+.abc{position:absolute;top:6px;left:8px;width:30px;height:30px;border-radius:50%;background:var(--desk-2);color:var(--ink);font-family:var(--f-body);font-size:1rem;font-weight:800;display:grid;place-items:center}
+.opt.ok .abc{background:#2f9e5b;color:#fff}.opt.no .abc{background:#d9534f;color:#fff}.opt.pick .abc{background:#00adb9;color:#05292c}
+.qz-btn.show{background:#ffd43b;color:#3a2e00}
+@media (max-width:760px){.tt{padding:6px 8px;font-size:.8rem}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -254,6 +302,14 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
       <button class="tbtn" id="hintBtn">İpucu</button>
       <button class="tbtn" id="quizBtn" title="Haydi, cevapla! soruları">Sorular</button>
       <button class="tbtn" id="bagBtn">Defterim <span class="count" id="bagCount">0</span></button>
+      <div class="ttools" role="group" aria-label="Öğretmen araçları">
+        <button class="tt" data-tool="tap" aria-pressed="true">👆 Dokun</button>
+        <button class="tt pen" data-tool="pen" aria-pressed="false">✏️ Kalem</button>
+        <button class="tt hl" data-tool="hl" aria-pressed="false">🖍️ Fosforlu</button>
+        <button class="tt veil" data-tool="veil" aria-pressed="false">▮ Perde</button>
+        <button class="tt" id="wipeBtn">🧽 Sil</button>
+      </div>
+      <button class="tbtn" id="teachBtn" aria-pressed="false" title="Akıllı tahta için büyük görünüm">🧑‍🏫 Öğretmen</button>
       <button class="tbtn" id="fsBtn" title="Tam ekran" aria-label="Tam ekran">⛶</button>
     </div>
   </header>
@@ -290,6 +346,7 @@ let LIB = null, BOOK = null;
 let langs = store.get('or.langs', ['en','ky','ru']);
 let hints = store.get('or.hints', true);
 let bag = [], cur = 1, active = null, showSent = false, two = false;
+let T = store.get('or.teach', false), tool = 'tap';
 
 /* ---------- library ---------- */
 async function loadLib(){
@@ -367,7 +424,8 @@ async function openBook(meta){
   cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
   quizDone = new Set(); sessionStars = new Set(); $('#backQ').hidden = true;
   renderBag(); syncLangs(); syncHints(); syncQuiz(); layout();
-  const tip = $('#tip'); tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
+  syncTeach(false);
+  const tip = $('#tip'); if(!T) tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
 }
 function asp(){ return BOOK.aspect ? BOOK.aspect[0] / BOOK.aspect[1] : 680.31 / 623.62; }
 function spreadOf(n){
@@ -399,7 +457,8 @@ function draw(){
   const endQ = pages[pages.length - 1] >= N ? pendingFor(pages) : [];
   $('#next').disabled = pages[pages.length - 1] >= N && !endQ.length;
   $('#next').textContent = pages[pages.length - 1] >= N && endQ.length ? '✓' : '›';
-  store.set('or.page.' + BOOK.id, pages[pages.length - 1]);
+  if(!T) store.set('or.page.' + BOOK.id, pages[pages.length - 1]);
+  setupInk();
   // preload neighbours
   [pages[0] - 2, pages[0] - 1, pages[pages.length - 1] + 1, pages[pages.length - 1] + 2].forEach(n => {
     if(n >= 1 && n <= N){ const im = new Image(); im.src = `books/${BOOK.id}/${BOOK.pages[n - 1].img}`; }
@@ -415,7 +474,7 @@ function pageEl(p){
     b.style.cssText = `left:${w.b[0]}%;top:${w.b[1]}%;width:${w.b[2]}%;height:${w.b[3]}%`;
     b.setAttribute('aria-label', w.t);
     b.dataset.k = w.k; b.dataset.s = w.s;
-    b.addEventListener('click', ev => { ev.stopPropagation(); openWord(b); });
+    b.addEventListener('click', ev => { ev.stopPropagation(); if(T && tool === 'veil'){ toggleVeil(b); return; } if(b.classList.contains('veiled')){ unveil(b); return; } openWord(b); });
     pg.appendChild(b);
   });
   return pg;
@@ -454,6 +513,7 @@ let tx = null;
 $('#stage').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
 $('#stage').addEventListener('touchend', e => {
   if(tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if(T && (tool === 'pen' || tool === 'hl')) return;
   if(Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
 });
 let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
@@ -467,7 +527,7 @@ function say(text){ if(!trVoice) return; speechSynthesis.cancel(); const u = new
 
 /* ---------- word card ---------- */
 const pop = $('#pop');
-function trList(o){ return `<ul class="tr">${langs.map(l => `<li><span class="lb">${LBL[l]}</span><span class="tx">${o[l]}</span></li>`).join('')}</ul>`; }
+function trList(o){ return `<ul class="tr">${(T ? ['en','ky','ru'] : langs).map(l => `<li><span class="lb">${LBL[l]}</span><span class="tx">${o[l]}</span></li>`).join('')}</ul>`; }
 const inBag = k => bag.includes(k);
 function render(btn){
   const g = BOOK.gloss[btn.dataset.k], s = BOOK.sent[btn.dataset.s];
@@ -479,13 +539,13 @@ function render(btn){
     <div class="wrow">${trList(g)}${g.img ? `<img class="wpic" src="books/${BOOK.id}/${g.img}" alt="${g.w}">` : ''}</div>
     <div class="acts">
       <button class="act" data-sent aria-pressed="${showSent}">Cümleyi çevir</button>
-      <button class="act ${inBag(btn.dataset.k) ? 'done' : ''}" data-bag>${inBag(btn.dataset.k) ? '✓ Defterde' : '★ Deftere ekle'}</button>
+      ${T ? '' : `<button class="act ${inBag(btn.dataset.k) ? 'done' : ''}" data-bag>${inBag(btn.dataset.k) ? '✓ Defterde' : '★ Deftere ekle'}</button>`}
     </div>
     ${showSent ? `<div class="sentbox"><div class="tq"><span>${s.tr}</span>${trVoice ? '<button class="round say" data-say="s" aria-label="Cümleyi dinle">🔊</button>' : ''}</div>${trList(s)}</div>` : ''}`;
   pop.querySelector('[data-x]').onclick = closePop;
   pop.querySelectorAll('[data-say]').forEach(b => b.onclick = () => say(b.dataset.say === 'w' ? g.w : s.tr.replace(/^[^:]+:\s*/, '')));
   pop.querySelector('[data-sent]').onclick = () => { showSent = !showSent; render(btn); place(btn); };
-  pop.querySelector('[data-bag]').onclick = () => {
+  if(!T) pop.querySelector('[data-bag]').onclick = () => {
     const k = btn.dataset.k; bag = inBag(k) ? bag.filter(x => x !== k) : [...bag, k];
     store.set('or.bag.' + BOOK.id, bag); renderBag(); render(btn);
   };
@@ -543,6 +603,64 @@ $('#bagClear').onclick = () => {
 $('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } }catch(e){} };
 if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
 
+/* ---------- teacher mode (board view) ---------- */
+function syncTeach(redraw){
+  document.body.classList.toggle('teach', T);
+  $('#teachBtn').setAttribute('aria-pressed', T);
+  if(!T) tool = 'tap';
+  setTool(tool);
+  if(redraw && BOOK && !$('#reader').hidden) layout();
+}
+function setTool(t){
+  tool = t;
+  document.querySelectorAll('.tt[data-tool]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tool === t));
+  $('#book').classList.toggle('drawing', T && (t === 'pen' || t === 'hl'));
+  $('#book').classList.toggle('veiling', T && t === 'veil');
+  closePop();
+}
+$('#teachBtn').onclick = e => {
+  e.stopPropagation(); T = !T; store.set('or.teach', T);
+  try{
+    const de = document.documentElement;
+    if(T && !document.fullscreenElement && !document.webkitFullscreenElement){ const p = (de.requestFullscreen || de.webkitRequestFullscreen)?.call(de); if(p && p.catch) p.catch(() => {}); }
+    if(!T && (document.fullscreenElement || document.webkitFullscreenElement)){ (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); }
+  }catch(err){}
+  syncTeach(true);
+};
+document.querySelectorAll('.tt[data-tool]').forEach(b => b.onclick = e => { e.stopPropagation(); setTool(b.dataset.tool); });
+$('#wipeBtn').onclick = e => { e.stopPropagation(); strokes = []; paint(); document.querySelectorAll('.hit.veiled').forEach(h => h.classList.remove('veiled')); };
+function toggleVeil(b){ b.classList.toggle('veiled'); }
+function unveil(b){ b.classList.remove('veiled'); }
+
+/* ink: pen + highlighter over the spread, cleared on page turn */
+let strokes = [], inkC = null;
+function setupInk(){
+  strokes = [];
+  const book = $('#book');
+  inkC = document.createElement('canvas'); inkC.className = 'ink'; book.appendChild(inkC);
+  const r = book.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  inkC.width = Math.round(r.width * dpr); inkC.height = Math.round(r.height * dpr);
+  let s = null;
+  const pt = ev => { const b = inkC.getBoundingClientRect(); return [(ev.clientX - b.left) / b.width, (ev.clientY - b.top) / b.height]; };
+  inkC.addEventListener('pointerdown', ev => { if(!(T && (tool === 'pen' || tool === 'hl'))) return; ev.preventDefault(); ev.stopPropagation(); inkC.setPointerCapture(ev.pointerId); s = {t:tool, p:[pt(ev)]}; strokes.push(s); paint(); });
+  inkC.addEventListener('pointermove', ev => { if(!s) return; ev.preventDefault(); s.p.push(pt(ev)); paint(); });
+  const end = () => { s = null; };
+  inkC.addEventListener('pointerup', end); inkC.addEventListener('pointercancel', end);
+  inkC.addEventListener('click', ev => ev.stopPropagation());
+}
+function paint(){
+  if(!inkC) return;
+  const c = inkC.getContext('2d'), W = inkC.width, H = inkC.height;
+  c.clearRect(0, 0, W, H); c.lineCap = 'round'; c.lineJoin = 'round';
+  strokes.forEach(s => {
+    c.strokeStyle = s.t === 'pen' ? '#e8590c' : 'rgba(255,212,59,.5)';
+    c.lineWidth = (s.t === 'pen' ? .004 : .028) * W;
+    c.beginPath(); s.p.forEach(([x, y], i) => i ? c.lineTo(x * W, y * H) : c.moveTo(x * W, y * H));
+    if(s.p.length === 1) c.lineTo(s.p[0][0] * W + .5, s.p[0][1] * H);
+    c.stroke();
+  });
+}
+
 /* ---------- Haydi, cevapla! ---------- */
 let quizOn = store.get('or.quiz', true), quizDone = new Set(), QS = null;
 function syncQuiz(){ $('#quizBtn').setAttribute('aria-pressed', quizOn); $('#quizBtn').hidden = !(BOOK && BOOK.quiz && BOOK.quiz.length); }
@@ -560,17 +678,18 @@ function showQ(){
   const q = QS.list[QS.i], host = BOOK.host || {name:'', face:''};
   const st = QS.st[q.id] || (QS.st[q.id] = {tries:0, state:'open', pick:null, order:[], tr:false, mix: q.type === 'order' ? shuffle(q.options.map((o, i) => i)) : null});
   const qz = $('#qz'), trOn = st.tr;
-  const trBlock = o => o ? `<ul class="qz-tr">${langs.map(l => `<li><span>${LBL[l]}</span><span>${o[l]}</span></li>`).join('')}</ul>` : '';
-  const optSub = o => trOn && o.tt ? `<small>${langs.map(l => o.tt[l]).join(' · ')}</small>` : '';
+  const L3 = T ? ['en','ky','ru'] : langs;
+  const trBlock = o => o ? `<ul class="qz-tr">${L3.map(l => `<li><span>${LBL[l]}</span><span>${o[l]}</span></li>`).join('')}</ul>` : '';
+  const optSub = o => trOn && o.tt ? `<small>${L3.map(l => o.tt[l]).join(' · ')}</small>` : '';
   let body = '';
   if(['mc','tf','who','predict'].includes(q.type)){
     const n = q.options.length;
     const allFaces = q.options.every(o => o.face);  // pictures only when every option has one
     body = `<div class="qz-opts ${n === 2 ? 'row2' : 'row3'}">${q.options.map((o, i) => {
       let cls = '';
-      if(st.pick === i) cls = q.type === 'predict' ? 'pick' : (i === q.answer ? 'ok' : 'no');
+      if(st.pick === i) cls = (q.type === 'predict' || (T && st.state === 'open')) ? 'pick' : (i === q.answer ? 'ok' : 'no');
       if(st.state !== 'open' && q.answer === i && q.type !== 'predict') cls = 'ok';
-      return `<button class="opt ${cls}" data-i="${i}" ${st.state !== 'open' ? 'disabled' : ''}>${allFaces ? `<img src="books/${BOOK.id}/${o.face}" alt="">` : ''}${o.t}${optSub(o)}</button>`;
+      return `<button class="opt ${cls}" data-i="${i}" ${st.state !== 'open' ? 'disabled' : ''}>${T ? `<span class="abc">${'ABCD'[i]}</span>` : ''}${allFaces ? `<img src="books/${BOOK.id}/${o.face}" alt="">` : ''}${o.t}${optSub(o)}</button>`;
     }).join('')}</div>`;
   } else if(q.type === 'order'){
     const placed = st.state === 'revealed' ? q.options.map((o, i) => i) : st.order;
@@ -584,8 +703,10 @@ function showQ(){
   const nextBtn = `<button class="qz-btn main" data-next>Devam ›</button>`;
   if(q.type === 'talk'){ foot = nextBtn; }
   else if(st.state === 'ok'){ fb = `<p class="qz-fb ok">Aferin! 🎉</p>`; foot = findBtn + nextBtn; }
+  else if(st.state === 'revealed' && T){ fb = `<p class="qz-fb no">Doğru cevap: ${q.type === 'order' ? 'bu sıra' : 'ABCD'[q.answer]}<small>Kitapta birlikte bakalım!</small></p>`; foot = findBtn + nextBtn; }
   else if(st.state === 'revealed'){ fb = `<p class="qz-fb no">Doğru cevap bu.<small>Kitapta birlikte bakalım!</small></p>`; foot = findBtn + nextBtn; }
   else if(st.state === 'seen'){ fb = `<p class="qz-fb">Haydi, okuyalım ve görelim!</p>`; foot = nextBtn; }
+  else if(T && q.type !== 'predict'){ const ready = q.type === 'order' ? st.order.length === q.options.length : st.pick !== null; fb = `<p class="qz-fb">${ready ? 'Herkes hazır mı?' : 'Sınıf ne diyor?'}</p>`; foot = `<button class="qz-btn alt" data-redo>↺</button><button class="qz-btn show" data-show>👀 Cevabı göster</button>`; }
   else if(st.tries === 1){ fb = `<p class="qz-fb no">Bir daha dene!</p>`; }
   const spk = trVoice ? `<button class="round say" data-say aria-label="Dinle">🔊</button>` : '';
   qz.innerHTML = `
@@ -602,9 +723,13 @@ function showQ(){
   qz.querySelector('[data-skip]')?.addEventListener('click', nextQ);
   qz.querySelector('[data-next]')?.addEventListener('click', nextQ);
   qz.querySelector('[data-find]')?.addEventListener('click', () => findInBook(q));
+  qz.querySelector('[data-show]')?.addEventListener('click', () => reveal(q, st));
+  qz.querySelector('[data-redo]')?.addEventListener('click', () => { st.pick = null; st.order = []; showQ(); });
   qz.querySelectorAll('.opt:not(:disabled)').forEach(b => b.onclick = () => answer(q, st, +b.dataset.i));
 }
 function answer(q, st, i){
+  if(T && q.type === 'order'){ if(st.order.length < q.options.length) st.order.push(i); return showQ(); }
+  if(T && q.type !== 'predict'){ st.pick = i; return showQ(); }
   if(q.type === 'predict'){ st.pick = i; st.state = 'seen'; return showQ(); }
   if(q.type === 'order'){
     st.order.push(i);
@@ -619,6 +744,12 @@ function answer(q, st, i){
   st.pick = i; st.tries++;
   if(i === q.answer){ st.state = 'ok'; giveStar(q); }
   else if(st.tries >= 2){ st.state = 'revealed'; }
+  showQ();
+}
+function reveal(q, st){
+  if(q.type === 'order'){ const right = st.order.length === q.options.length && st.order.every((v, k) => v === k); st.state = right ? 'ok' : 'revealed'; }
+  else { st.state = st.pick === q.answer ? 'ok' : 'revealed'; }
+  if(st.state === 'ok') giveStar(q);
   showQ();
 }
 function nextQ(){
