@@ -91,11 +91,6 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .hello{display:none}
 .cnt{margin-left:10px;opacity:.55;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .cnt b{font-weight:800}
-.stat{width:100%;border-collapse:collapse;margin-top:12px;font-variant-numeric:tabular-nums}
-.stat td{padding:6px 8px;border-bottom:1px solid var(--line)}
-.stat td:last-child{text-align:right;font-weight:800}
-.stat tr.h td{font-family:var(--f-display);font-weight:800;color:var(--teal-deep);padding-top:14px;border-bottom:2px solid var(--teal-wash)}
-.big{display:flex;gap:10px;margin-top:12px}.big div{flex:1;background:var(--desk);border-radius:14px;padding:10px 12px}.big b{display:block;font-family:var(--f-display);font-size:1.8rem;line-height:1}.big small{font-weight:800;color:var(--ink-soft)}
 .foot{max-width:1100px;margin:0 auto;padding:0 16px 30px;color:var(--ink-soft);font-size:.82rem;font-weight:700}
 @media (max-width:760px){.frame{padding:9px;border-radius:10px}.wall{padding-inline:10px}.logo img{height:38px}.band p{font-size:.85rem}}
 
@@ -408,50 +403,13 @@ function chooseStart(id){
 }
 $('#qzScrim').addEventListener('click', e => { if(e.target === $('#qzScrim') && !QS){ $('#qzScrim').hidden = true; } });
 
-/* ---------- usage counter (Abacus, no account, no personal data) ---------- */
+/* ---------- usage counter (Abacus, no account, no personal data): every visit counts ---------- */
 const CNT = 'https://abacus.jasoncameron.dev', NS = 'akilli-kitaplik-gk';
-const fmt = n => Number(n || 0).toLocaleString('tr-TR');
-function hit(key){
-  if(store.get('or.nocount', false)) return Promise.resolve(null);
-  try{ if(sessionStorage.getItem('or.c.' + key)) return Promise.resolve(null); sessionStorage.setItem('or.c.' + key, '1'); }catch(e){}
-  return fetch(`${CNT}/hit/${NS}/${key}`).then(r => r.ok ? r.json() : null).then(j => j ? j.value : null).catch(() => null);
-}
-function getC(key){ return fetch(`${CNT}/get/${NS}/${key}`).then(r => r.ok ? r.json() : (r.status === 404 ? {value:0} : null)).then(j => j ? j.value : null).catch(() => null); }
+function hit(key){ return fetch(`${CNT}/hit/${NS}/${key}`).then(r => r.ok ? r.json() : null).then(j => j ? j.value : null).catch(() => null); }
 async function showCount(){
-  let v = await hit('acilis');
-  if(v === null) v = await getC('acilis');
+  const v = await hit('acilis');
   if(v === null) return;
-  $('#cnt b').textContent = fmt(v); $('#cnt').hidden = false;
-}
-function closeStats(){ $('#qzScrim').hidden = true; location.hash = ''; }
-async function statsCard(){
-  await loadLib();
-  $('#qz').className = 'qz wide';
-  $('#qz').innerHTML = `<div class="qz-h"><div class="qz-who"><b>Kullanım sayacı</b><small>Yükleniyor…</small></div><button class="round" data-x aria-label="Kapat">✕</button></div>`;
-  $('#qzScrim').hidden = false;
-  $('#qz').querySelector('[data-x]').onclick = closeStats;
-  const books = LIB.shelves.flatMap(s => s.books.filter(b => b.ready));
-  const keys = ['acilis', 'ogretmen', ...books.map(b => 'kitap-' + b.id)];
-  const vals = await Promise.all(keys.map(getC));
-  const V = Object.fromEntries(keys.map((k, i) => [k, vals[i]]));
-  if(vals.every(v => v === null)){ $('#qz .qz-who small').textContent = 'Sayaca şu an ulaşılamıyor. Biraz sonra tekrar dene.'; return; }
-  const rows = LIB.shelves.map(sh => {
-    const bs = sh.books.filter(b => b.ready); if(!bs.length) return '';
-    const sum = bs.reduce((a, b) => a + (V['kitap-' + b.id] || 0), 0);
-    return `<tr class="h"><td>${sh.title}</td><td>${fmt(sum)}</td></tr>` + bs.map(b => `<tr><td>${b.no}. ${b.title}</td><td>${fmt(V['kitap-' + b.id])}</td></tr>`).join('');
-  }).join('');
-  $('#qz').innerHTML = `
-    <div class="qz-h"><div class="qz-who"><b>Kullanım sayacı</b><small>Aynı cihaz, aynı oturumda bir kez sayılır${store.get('or.nocount', false) ? ' · bu cihaz sayılmıyor' : ''}</small></div><button class="round" data-x aria-label="Kapat">✕</button></div>
-    <div class="big"><div><b>${fmt(V.acilis)}</b><small>Kitaplık açılışı</small></div><div><b>${fmt(V.ogretmen)}</b><small>Öğretmen modu</small></div></div>
-    <table class="stat">${rows}</table>`;
-  $('#qz').querySelector('[data-x]').onclick = closeStats;
-}
-function noCountCard(){
-  const on = !store.get('or.nocount', false); store.set('or.nocount', on);
-  $('#qz').className = 'qz';
-  $('#qz').innerHTML = `<div class="qz-h"><div class="qz-who"><b>${on ? '✓ Bu cihaz artık sayılmıyor' : '✓ Bu cihaz yeniden sayılıyor'}</b><small>Değiştirmek için bu adresi tekrar aç.</small></div></div><div class="qz-foot"><button class="qz-btn main" data-x>Tamam</button></div>`;
-  $('#qzScrim').hidden = false;
-  $('#qz').querySelector('[data-x]').onclick = closeStats;
+  $('#cnt b').textContent = Number(v).toLocaleString('tr-TR'); $('#cnt').hidden = false;
 }
 
 /* ---------- routing ---------- */
@@ -459,7 +417,6 @@ async function route(){
   closePop(); closeBag();
   await loadLib();
   const id = location.hash.replace('#', '');
-  if(id === 'sayac' || id === 'bensayma'){ $('#reader').hidden = true; $('#lib').hidden = false; renderLib(); return id === 'sayac' ? statsCard() : noCountCard(); }
   const meta = LIB.shelves.flatMap(s => s.books).find(b => b.id === id && b.ready);
   if(meta){ await openBook(meta); hit('kitap-' + meta.id); }
   else { $('#reader').hidden = true; $('#lib').hidden = false; renderLib(); document.title = 'Akıllı Kitaplık'; }
