@@ -630,7 +630,7 @@ if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
 /* ---------- narration: page player + karaoke + speed ---------- */
 // ses.json: yeni biçim  "_p": {no: {f,d}},  sid: {p, a, b, w}  (sayfa kaydı, akıcı)
 //           eski biçim  sid: {f, d, w}                         (cümle kaydı)
-let SES = null, playing = false, autoplay = false, rate = store.get('or.rate', 1), queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
+let SES = null, playing = false, autoplay = false, rate = store.get('or.rate', 1) < 1 ? 0.85 : 1, queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
 const AU = new Audio(); AU.preload = 'auto'; AU.preservesPitch = true; AU.mozPreservesPitch = true; AU.webkitPreservesPitch = true;
 async function loadSes(){
   SES = null;
@@ -644,22 +644,22 @@ function syncPlayUI(){
   $('#playBtn').textContent = playing ? '⏸' : '▶';
   $('#playBtn').setAttribute('aria-label', playing ? 'Durdur' : 'Sayfayı oynat');
   $('#playBtn').classList.toggle('on', playing);
-  $('#rateBtn').textContent = rate === 1 ? '1×' : '0.8×';
+  $('#rateBtn').textContent = rate === 1 ? '1×' : '0.85×';
   $('#rateBtn').setAttribute('aria-pressed', rate !== 1);
 }
 function clearKara(){ document.querySelectorAll('.hit.kara,.hit.splay').forEach(h => h.classList.remove('kara', 'splay')); }
 function hitsOf(sid){ return [...document.querySelectorAll('#book .hit')].filter(h => h.dataset.s === sid); }
 function pageSids(){ const out = []; document.querySelectorAll('#book .hit').forEach(h => { const s = h.dataset.s; if(hasSes(s) && !out.includes(s)) out.push(s); }); return out; }
-function srcOf(sid){ const e = SES[sid]; return e.p !== undefined ? SES._p[e.p].f : e.f; }
-function base(sid){ return SES[sid].p !== undefined ? 0 : 0; }
+// page clip: slow mode uses the pre-made slow file (fy, times × k) instead of browser stretching
+function pageSrc(no){ const P = SES._p[no]; return (rate < 1 && P.fy) ? {src: P.fy, k: P.k || 1} : {src: P.f, k: 1}; }
 // one playable chunk: a file (+ optional range) and the sentences it carries
-function sentItem(sid, from, to){ const e = SES[sid]; return e.p !== undefined ? {src: srcOf(sid), from: from ?? e.a, to: to ?? e.b, sids: [sid]} : {src: e.f, from: from || 0, to: to ?? null, sids: [sid]}; }
+function sentItem(sid, from, to){ const e = SES[sid]; return e.p !== undefined ? {...pageSrc(e.p), from: from ?? e.a, to: to ?? e.b, sids: [sid], page: e.p} : {src: e.f, k: 1, from: from || 0, to: to ?? null, sids: [sid]}; }
 function buildQueue(){
   const q = [];
   pageSids().forEach(s => {
     const e = SES[s];
-    if(e.p !== undefined){ const last = q[q.length - 1]; if(last && last.page === e.p) last.sids.push(s); else q.push({src: SES._p[e.p].f, from: 0, to: null, sids: [s], page: e.p}); }
-    else q.push({src: e.f, from: 0, to: null, sids: [s], gap: true});
+    if(e.p !== undefined){ const last = q[q.length - 1]; if(last && last.page === e.p) last.sids.push(s); else q.push({...pageSrc(e.p), from: 0, to: null, sids: [s], page: e.p}); }
+    else q.push({src: e.f, k: 1, from: 0, to: null, sids: [s], gap: true});
   });
   return q;
 }
@@ -667,7 +667,7 @@ function karaLoop(){
   cancelAnimationFrame(raf);
   const loop = () => {
     if(!item) return;
-    const t = AU.currentTime;
+    const t = AU.currentTime / (item.k || 1);
     if(clipEnd !== null && t >= clipEnd){ AU.pause(); clipEnd = null; endClip(); return; }
     item.sids.forEach(s => {
       const e = SES[s], hs = hitCache[s] || (hitCache[s] = hitsOf(s)), w = e.w || [];
@@ -685,7 +685,7 @@ function playItem(it, then){
   clearKara(); item = it; hitCache = {};
   clipEnd = it.to ?? null; afterClip = then || (() => { item = null; });
   const src = `books/${BOOK.id}/ses/${it.src}`;
-  const start = () => { try{ AU.currentTime = it.from || 0; }catch(err){} AU.playbackRate = rate; AU.play().catch(() => stopPlay()); };
+  const start = () => { try{ AU.currentTime = (it.from || 0) * (it.k || 1); }catch(err){} AU.playbackRate = it.page !== undefined ? 1 : rate; AU.play().catch(() => stopPlay()); };
   if(!AU.src.endsWith(src)){ AU.src = src; AU.addEventListener('loadedmetadata', start, {once:true}); AU.load(); }
   else start();
 }
@@ -724,12 +724,20 @@ function resumeOrPause(){
   if(item && queue.length && AU.src && !AU.ended && AU.currentTime > 0){
     playing = true; syncPlayUI();
     const it = item; afterClip = () => setTimeout(nextInQueue, (it.gap ? 280 : 120) / rate);
-    AU.playbackRate = rate; AU.play(); return;
+    AU.playbackRate = it.page !== undefined ? 1 : rate; AU.play(); return;
   }
   playPage();
 }
 $('#playBtn').onclick = e => { e.stopPropagation(); resumeOrPause(); };
-$('#rateBtn').onclick = e => { e.stopPropagation(); rate = rate === 1 ? 0.8 : 1; store.set('or.rate', rate); AU.playbackRate = rate; syncPlayUI(); };
+$('#rateBtn').onclick = e => {
+  e.stopPropagation(); rate = rate === 1 ? 0.85 : 1; store.set('or.rate', rate); syncPlayUI();
+  if(!item) return;
+  if(item.page === undefined){ AU.playbackRate = rate; return; }
+  // switch between normal and slow page file at the same spot
+  const t = AU.currentTime / (item.k || 1), was = !AU.paused, cb = afterClip, end = clipEnd;
+  Object.assign(item, pageSrc(item.page)); item.from = t; item.to = end;
+  const keep = cb; playItem(item, keep); if(!was){ AU.addEventListener('playing', () => AU.pause(), {once:true}); }
+};
 function sayFromBook(btn, which){
   const sid = btn.dataset.s;
   if(!hasSes(sid)) return false;
