@@ -634,7 +634,7 @@ let SES = null, playing = false, autoplay = false, rate = store.get('or.rate', 1
 const AU = new Audio(); AU.preload = 'auto'; AU.preservesPitch = true; AU.mozPreservesPitch = true; AU.webkitPreservesPitch = true;
 async function loadSes(){
   SES = null;
-  try{ const r = await fetch(`books/${BOOK.id}/ses.json`); if(r.ok) SES = await r.json(); }catch(e){}
+  try{ const r = await fetch(`books/${BOOK.id}/ses.json?t=${Date.now()}`, {cache: 'no-store'}); if(r.ok) SES = await r.json(); }catch(e){}
   syncPlayUI();
 }
 const hasSes = sid => !!(SES && SES[sid] && sid[0] !== '_');
