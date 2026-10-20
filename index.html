@@ -707,7 +707,9 @@ function sayFromBook(btn, which){
   if(which === 's'){ playSid(sid, 0, null); return true; }
   const i = hitsOf(sid).indexOf(btn), w = e.w && e.w[i];
   if(!w) { playSid(sid, 0, null); return true; }
-  playSid(sid, Math.max(0, w[0] - 0.05), w[1] + 0.08);
+  const ws = e.w, prev = ws.slice(0, i).reverse().find(Boolean), nx = ws.slice(i + 1).find(Boolean);
+  const a = Math.max(prev ? prev[1] : 0, w[0] - 0.08), b = nx ? Math.min(nx[0], w[1] + 0.3) : Math.min(e.d, w[1] + 0.35);
+  playSid(sid, a, Math.max(b, w[1] + 0.05));
   return true;
 }
 
