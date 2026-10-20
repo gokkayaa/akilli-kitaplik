@@ -554,7 +554,7 @@ function trList(o){ return `<ul class="tr">${(T ? ['en','ky','ru'] : langs).map(
 const inBag = k => bag.includes(k);
 function render(btn){
   const g = BOOK.gloss[btn.dataset.k], s = BOOK.sent[btn.dataset.s];
-  const hasA = SES && SES[btn.dataset.s];
+  const hasA = SES && hasSes(btn.dataset.s);
   const spk = (trVoice || hasA) ? `<button class="round say" data-say="w" aria-label="Dinle">🔊</button>` : '';
   pop.innerHTML = `
     <div class="pop-h"><h2 class="pop-w">${g.w}</h2>${spk}<button class="round" data-x aria-label="Kapat">✕</button></div>
@@ -628,13 +628,16 @@ $('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitF
 if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
 
 /* ---------- narration: page player + karaoke + speed ---------- */
-let SES = null, playing = false, autoplay = false, rate = store.get('or.rate', 1), queue = [], qi = 0, raf = 0, curSid = null, curHits = [], curTimes = [], clipEnd = null, afterClip = null;
+// ses.json: yeni biçim  "_p": {no: {f,d}},  sid: {p, a, b, w}  (sayfa kaydı, akıcı)
+//           eski biçim  sid: {f, d, w}                         (cümle kaydı)
+let SES = null, playing = false, autoplay = false, rate = store.get('or.rate', 1), queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
 const AU = new Audio(); AU.preload = 'auto'; AU.preservesPitch = true; AU.mozPreservesPitch = true; AU.webkitPreservesPitch = true;
 async function loadSes(){
   SES = null;
   try{ const r = await fetch(`books/${BOOK.id}/ses.json`); if(r.ok) SES = await r.json(); }catch(e){}
   syncPlayUI();
 }
+const hasSes = sid => !!(SES && SES[sid] && sid[0] !== '_');
 function syncPlayUI(){
   const has = !!SES;
   $('#playBtn').hidden = !has; $('#rateBtn').hidden = !has;
@@ -646,43 +649,59 @@ function syncPlayUI(){
 }
 function clearKara(){ document.querySelectorAll('.hit.kara,.hit.splay').forEach(h => h.classList.remove('kara', 'splay')); }
 function hitsOf(sid){ return [...document.querySelectorAll('#book .hit')].filter(h => h.dataset.s === sid); }
-function pageSids(){ const out = []; document.querySelectorAll('#book .hit').forEach(h => { const s = h.dataset.s; if(SES && SES[s] && !out.includes(s)) out.push(s); }); return out; }
+function pageSids(){ const out = []; document.querySelectorAll('#book .hit').forEach(h => { const s = h.dataset.s; if(hasSes(s) && !out.includes(s)) out.push(s); }); return out; }
+function srcOf(sid){ const e = SES[sid]; return e.p !== undefined ? SES._p[e.p].f : e.f; }
+function base(sid){ return SES[sid].p !== undefined ? 0 : 0; }
+// one playable chunk: a file (+ optional range) and the sentences it carries
+function sentItem(sid, from, to){ const e = SES[sid]; return e.p !== undefined ? {src: srcOf(sid), from: from ?? e.a, to: to ?? e.b, sids: [sid]} : {src: e.f, from: from || 0, to: to ?? null, sids: [sid]}; }
+function buildQueue(){
+  const q = [];
+  pageSids().forEach(s => {
+    const e = SES[s];
+    if(e.p !== undefined){ const last = q[q.length - 1]; if(last && last.page === e.p) last.sids.push(s); else q.push({src: SES._p[e.p].f, from: 0, to: null, sids: [s], page: e.p}); }
+    else q.push({src: e.f, from: 0, to: null, sids: [s], gap: true});
+  });
+  return q;
+}
 function karaLoop(){
   cancelAnimationFrame(raf);
   const loop = () => {
+    if(!item) return;
     const t = AU.currentTime;
     if(clipEnd !== null && t >= clipEnd){ AU.pause(); clipEnd = null; endClip(); return; }
-    curHits.forEach((h, i) => { const w = curTimes[i]; h.classList.toggle('kara', !!w && t >= w[0] - 0.03 && t < w[1] + 0.06); });
+    item.sids.forEach(s => {
+      const e = SES[s], hs = hitCache[s] || (hitCache[s] = hitsOf(s)), w = e.w || [];
+      const inS = e.p !== undefined ? (t >= e.a && t < e.b) : true;
+      hs.forEach((h, i) => { h.classList.toggle('splay', inS); const x = w[i]; h.classList.toggle('kara', !!x && t >= x[0] - 0.03 && t < x[1] + 0.06); });
+    });
     if(!AU.paused && !AU.ended) raf = requestAnimationFrame(loop);
   };
   raf = requestAnimationFrame(loop);
 }
 AU.addEventListener('playing', karaLoop);
 AU.addEventListener('ended', () => endClip());
-function endClip(){ cancelAnimationFrame(raf); const cb = afterClip; afterClip = null; curHits.forEach(h => h.classList.remove('kara')); cb && cb(); }
-function playSid(sid, from, to, then){
-  const e = SES[sid]; if(!e) return then && then();
-  clearKara(); curSid = sid; curHits = hitsOf(sid); curTimes = e.w || [];
-  curHits.forEach(h => h.classList.add('splay'));
-  clipEnd = (to === undefined || to === null) ? null : to; afterClip = then || (() => { clearKara(); curSid = null; });
-  const src = `books/${BOOK.id}/ses/${e.f}`;
-  const start = () => { try{ AU.currentTime = from || 0; }catch(err){} AU.playbackRate = rate; AU.play().catch(() => stopPlay()); };
+function endClip(){ cancelAnimationFrame(raf); const cb = afterClip; afterClip = null; clearKara(); cb && cb(); }
+function playItem(it, then){
+  clearKara(); item = it; hitCache = {};
+  clipEnd = it.to ?? null; afterClip = then || (() => { item = null; });
+  const src = `books/${BOOK.id}/ses/${it.src}`;
+  const start = () => { try{ AU.currentTime = it.from || 0; }catch(err){} AU.playbackRate = rate; AU.play().catch(() => stopPlay()); };
   if(!AU.src.endsWith(src)){ AU.src = src; AU.addEventListener('loadedmetadata', start, {once:true}); AU.load(); }
   else start();
 }
 function playPage(){
-  closePop(); queue = pageSids(); qi = 0;
+  closePop(); queue = buildQueue(); qi = 0;
   if(!queue.length){ return endOfPage(); }
   playing = true; syncPlayUI(); nextInQueue();
 }
 function nextInQueue(){
   if(!playing) return;
   if(qi >= queue.length) return endOfPage();
-  const sid = queue[qi++];
-  playSid(sid, 0, null, () => { curHits.forEach(h => h.classList.remove('splay')); setTimeout(nextInQueue, 280 / rate); });
+  const it = queue[qi++];
+  playItem(it, () => setTimeout(nextInQueue, (it.gap ? 280 : 120) / rate));
 }
 function endOfPage(){
-  clearKara(); curSid = null;
+  clearKara(); item = null;
   const pages = spreadOf(cur), N = BOOK.pages.length;
   if(pages[pages.length - 1] >= N && !pendingFor(pages).length){ stopPlay(); return; }
   playing = false; autoplay = true; syncPlayUI();
@@ -691,25 +710,31 @@ function endOfPage(){
 }
 function stopPlay(){
   playing = false; autoplay = false; afterClip = null; clipEnd = null;
-  try{ AU.pause(); }catch(e){} cancelAnimationFrame(raf); clearKara(); curSid = null; syncPlayUI();
+  try{ AU.pause(); }catch(e){} cancelAnimationFrame(raf); clearKara(); item = null; syncPlayUI();
 }
 function resumeOrPause(){
   if(playing){ AU.pause(); playing = false; autoplay = false; cancelAnimationFrame(raf); syncPlayUI(); return; }
-  if(curSid && AU.src && !AU.ended && AU.currentTime > 0){ playing = true; syncPlayUI(); afterClip = () => { curHits.forEach(h => h.classList.remove('splay')); setTimeout(nextInQueue, 280 / rate); }; AU.playbackRate = rate; AU.play(); return; }
+  if(item && queue.length && AU.src && !AU.ended && AU.currentTime > 0){
+    playing = true; syncPlayUI();
+    const it = item; afterClip = () => setTimeout(nextInQueue, (it.gap ? 280 : 120) / rate);
+    AU.playbackRate = rate; AU.play(); return;
+  }
   playPage();
 }
 $('#playBtn').onclick = e => { e.stopPropagation(); resumeOrPause(); };
 $('#rateBtn').onclick = e => { e.stopPropagation(); rate = rate === 1 ? 0.8 : 1; store.set('or.rate', rate); AU.playbackRate = rate; syncPlayUI(); };
 function sayFromBook(btn, which){
-  const sid = btn.dataset.s, e = SES && SES[sid];
-  if(!e) return false;
-  stopPlay();
-  if(which === 's'){ playSid(sid, 0, null); return true; }
+  const sid = btn.dataset.s;
+  if(!hasSes(sid)) return false;
+  stopPlay(); queue = [];
+  const e = SES[sid];
+  if(which === 's'){ playItem(sentItem(sid)); return true; }
   const i = hitsOf(sid).indexOf(btn), w = e.w && e.w[i];
-  if(!w) { playSid(sid, 0, null); return true; }
+  if(!w){ playItem(sentItem(sid)); return true; }
   const ws = e.w, prev = ws.slice(0, i).reverse().find(Boolean), nx = ws.slice(i + 1).find(Boolean);
-  const a = Math.max(prev ? prev[1] : 0, w[0] - 0.08), b = nx ? Math.min(nx[0], w[1] + 0.3) : Math.min(e.d, w[1] + 0.35);
-  playSid(sid, a, Math.max(b, w[1] + 0.05));
+  const lo = e.p !== undefined ? e.a : 0, hi = e.p !== undefined ? e.b : e.d;
+  const a = Math.max(prev ? prev[1] : lo, w[0] - 0.08), b = nx ? Math.min(nx[0], w[1] + 0.3) : Math.min(hi, w[1] + 0.35);
+  playItem(sentItem(sid, a, Math.max(b, w[1] + 0.05)));
   return true;
 }
 
