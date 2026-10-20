@@ -628,9 +628,11 @@ $('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitF
 if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
 
 /* ---------- narration: page player + karaoke + speed ---------- */
-// ses.json: yeni biçim  "_p": {no: {f,d}},  sid: {p, a, b, w}  (sayfa kaydı, akıcı)
-//           eski biçim  sid: {f, d, w}                         (cümle kaydı)
-let SES = null, playing = false, autoplay = false, rate = store.get('or.rate', 1) < 1 ? 0.85 : 1, queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
+// ses.json: sayfa biçimi  "_p": {no: {f, d, y: {A|B: {f, s: {sid: [o, k]}}}}},  sid: {p, a, b, w}
+//           eski biçim    sid: {f, d, w}  (cümle kaydı)
+// hız: 0 = normal, 1 = Yavaş (A: cümle arası es), 2 = Çok yavaş (B: yavaş ses + es)
+const SPD = [{t: '1×', m: null, r: 1}, {t: 'Yavaş', m: 'A', r: 0.92}, {t: 'Çok yavaş', m: 'B', r: 0.85}];
+let SES = null, playing = false, autoplay = false, spd = Math.min(2, Math.max(0, +store.get('or.spd', 0) || 0)), queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
 const AU = new Audio(); AU.preload = 'auto'; AU.preservesPitch = true; AU.mozPreservesPitch = true; AU.webkitPreservesPitch = true;
 async function loadSes(){
   SES = null;
@@ -644,22 +646,30 @@ function syncPlayUI(){
   $('#playBtn').textContent = playing ? '⏸' : '▶';
   $('#playBtn').setAttribute('aria-label', playing ? 'Durdur' : 'Sayfayı oynat');
   $('#playBtn').classList.toggle('on', playing);
-  $('#rateBtn').textContent = rate === 1 ? '1×' : '0.85×';
-  $('#rateBtn').setAttribute('aria-pressed', rate !== 1);
+  $('#rateBtn').textContent = SPD[spd].t;
+  $('#rateBtn').setAttribute('aria-pressed', spd > 0);
 }
 function clearKara(){ document.querySelectorAll('.hit.kara,.hit.splay').forEach(h => h.classList.remove('kara', 'splay')); }
 function hitsOf(sid){ return [...document.querySelectorAll('#book .hit')].filter(h => h.dataset.s === sid); }
 function pageSids(){ const out = []; document.querySelectorAll('#book .hit').forEach(h => { const s = h.dataset.s; if(hasSes(s) && !out.includes(s)) out.push(s); }); return out; }
-// page clip: slow mode uses the pre-made slow file (fy, times × k) instead of browser stretching
-function pageSrc(no){ const P = SES._p[no]; return (rate < 1 && P.fy) ? {src: P.fy, k: P.k || 1} : {src: P.f, k: 1}; }
-// one playable chunk: a file (+ optional range) and the sentences it carries
-function sentItem(sid, from, to){ const e = SES[sid]; return e.p !== undefined ? {...pageSrc(e.p), from: from ?? e.a, to: to ?? e.b, sids: [sid], page: e.p} : {src: e.f, k: 1, from: from || 0, to: to ?? null, sids: [sid]}; }
+// page file for the current speed + time map (logical sentence time -> file time)
+function pageSrc(no){
+  const P = SES._p[no], Y = SPD[spd].m && P.y && P.y[SPD[spd].m];
+  return Y ? {src: Y.f, M: Y.s, page: no} : {src: P.f, M: null, page: no};
+}
+function fT(it, s, t){ if(!it.M || !it.M[s]) return t; const [o, k] = it.M[s]; return o + (t - SES[s].a) * k; }
+function lT(it, s, tf){ if(!it.M || !it.M[s]) return tf; const [o, k] = it.M[s]; return SES[s].a + (tf - o) / k; }
+const pageRate = it => it.page !== undefined ? (it.M ? 1 : (SPD[spd].m && !(SES._p[it.page].y) ? SPD[spd].r : 1)) : SPD[spd].r;
+function sentItem(sid, from, to){
+  const e = SES[sid];
+  return e.p !== undefined ? {...pageSrc(e.p), from: from ?? e.a, to: to ?? e.b, sids: [sid]} : {src: e.f, M: null, from: from || 0, to: to ?? null, sids: [sid]};
+}
 function buildQueue(){
   const q = [];
   pageSids().forEach(s => {
     const e = SES[s];
-    if(e.p !== undefined){ const last = q[q.length - 1]; if(last && last.page === e.p) last.sids.push(s); else q.push({...pageSrc(e.p), from: 0, to: null, sids: [s], page: e.p}); }
-    else q.push({src: e.f, k: 1, from: 0, to: null, sids: [s], gap: true});
+    if(e.p !== undefined){ const last = q[q.length - 1]; if(last && last.page === e.p) last.sids.push(s); else q.push({...pageSrc(e.p), from: null, to: null, sids: [s]}); }
+    else q.push({src: e.f, M: null, from: 0, to: null, sids: [s], gap: true});
   });
   return q;
 }
@@ -667,12 +677,13 @@ function karaLoop(){
   cancelAnimationFrame(raf);
   const loop = () => {
     if(!item) return;
-    const t = AU.currentTime / (item.k || 1);
-    if(clipEnd !== null && t >= clipEnd){ AU.pause(); clipEnd = null; endClip(); return; }
+    const tf = AU.currentTime;
+    if(clipEnd !== null && tf >= clipEnd){ AU.pause(); clipEnd = null; endClip(); return; }
     item.sids.forEach(s => {
       const e = SES[s], hs = hitCache[s] || (hitCache[s] = hitsOf(s)), w = e.w || [];
+      const t = lT(item, s, tf);
       const inS = e.p !== undefined ? (t >= e.a && t < e.b) : true;
-      hs.forEach((h, i) => { h.classList.toggle('splay', inS); const x = w[i]; h.classList.toggle('kara', !!x && t >= x[0] - 0.03 && t < x[1] + 0.06); });
+      hs.forEach((h, i) => { h.classList.toggle('splay', inS); const x = w[i]; h.classList.toggle('kara', inS && !!x && t >= x[0] - 0.03 && t < x[1] + 0.06); });
     });
     if(!AU.paused && !AU.ended) raf = requestAnimationFrame(loop);
   };
@@ -681,11 +692,14 @@ function karaLoop(){
 AU.addEventListener('playing', karaLoop);
 AU.addEventListener('ended', () => endClip());
 function endClip(){ cancelAnimationFrame(raf); const cb = afterClip; afterClip = null; clearKara(); cb && cb(); }
-function playItem(it, then){
+function playItem(it, then, atFile){
   clearKara(); item = it; hitCache = {};
-  clipEnd = it.to ?? null; afterClip = then || (() => { item = null; });
+  const s0 = it.sids[0];
+  clipEnd = it.to == null ? null : fT(it, s0, it.to);
+  afterClip = then || (() => { item = null; });
+  const startF = atFile ?? (it.from == null ? 0 : fT(it, s0, it.from));
   const src = `books/${BOOK.id}/ses/${it.src}`;
-  const start = () => { try{ AU.currentTime = (it.from || 0) * (it.k || 1); }catch(err){} AU.playbackRate = it.page !== undefined ? 1 : rate; AU.play().catch(() => stopPlay()); };
+  const start = () => { try{ AU.currentTime = startF; }catch(err){} AU.playbackRate = pageRate(it); AU.play().catch(() => stopPlay()); };
   if(!AU.src.endsWith(src)){ AU.src = src; AU.addEventListener('loadedmetadata', start, {once:true}); AU.load(); }
   else start();
 }
@@ -698,7 +712,7 @@ function nextInQueue(){
   if(!playing) return;
   if(qi >= queue.length) return endOfPage();
   const it = queue[qi++];
-  playItem(it, () => setTimeout(nextInQueue, (it.gap ? 280 : 120) / rate));
+  playItem(it, () => setTimeout(nextInQueue, it.gap ? 300 : 150));
 }
 function endOfPage(){
   clearKara(); item = null;
@@ -722,21 +736,27 @@ function stopPlay(keep){
 function resumeOrPause(){
   if(playing){ AU.pause(); playing = false; autoplay = false; cancelAnimationFrame(raf); syncPlayUI(); return; }
   if(item && queue.length && AU.src && !AU.ended && AU.currentTime > 0){
-    playing = true; syncPlayUI();
-    const it = item; afterClip = () => setTimeout(nextInQueue, (it.gap ? 280 : 120) / rate);
-    AU.playbackRate = it.page !== undefined ? 1 : rate; AU.play(); return;
+    playing = true; autoplay = true; syncPlayUI();
+    const it = item; afterClip = () => setTimeout(nextInQueue, it.gap ? 300 : 150);
+    AU.playbackRate = pageRate(it); AU.play(); return;
   }
   playPage();
 }
 $('#playBtn').onclick = e => { e.stopPropagation(); resumeOrPause(); };
 $('#rateBtn').onclick = e => {
-  e.stopPropagation(); rate = rate === 1 ? 0.85 : 1; store.set('or.rate', rate); syncPlayUI();
+  e.stopPropagation(); spd = (spd + 1) % SPD.length; store.set('or.spd', spd); syncPlayUI();
   if(!item) return;
-  if(item.page === undefined){ AU.playbackRate = rate; return; }
-  // switch between normal and slow page file at the same spot
-  const t = AU.currentTime / (item.k || 1), was = !AU.paused, cb = afterClip, end = clipEnd;
-  Object.assign(item, pageSrc(item.page)); item.from = t; item.to = end;
-  const keep = cb; playItem(item, keep); if(!was){ AU.addEventListener('playing', () => AU.pause(), {once:true}); }
+  if(item.page === undefined){ AU.playbackRate = SPD[spd].r; return; }
+  // same spot in the other speed's file
+  const tf = AU.currentTime, was = !AU.paused, cb = afterClip;
+  let s = item.sids[0];
+  for(const x of item.sids){ if(fT(item, x, SES[x].a) <= tf + 1e-3) s = x; }
+  const t = lT(item, s, tf), toL = clipEnd === null ? null : item.to;
+  const nu = {...item, ...pageSrc(item.page)};
+  const F = fT(nu, s, t);
+  nu.from = null; nu.to = toL;
+  playItem(nu, cb, F);
+  if(!was) AU.addEventListener('playing', () => AU.pause(), {once:true});
 };
 function sayFromBook(btn, which){
   const sid = btn.dataset.s;
