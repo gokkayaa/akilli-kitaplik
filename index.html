@@ -445,7 +445,7 @@ async function openBook(meta){
   bag = store.get('or.bag.' + BOOK.id, []);
   cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
   quizDone = new Set(); sessionStars = new Set(); $('#backQ').hidden = true;
-  stopPlay(); renderBag(); syncLangs(); syncHints(); syncQuiz(); layout(); loadSes();
+  stopPlay(); drawnKey = ''; renderBag(); syncLangs(); syncHints(); syncQuiz(); layout(); loadSes();
   syncTeach(false);
   const tip = $('#tip'); if(!T) tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
 }
@@ -464,7 +464,7 @@ function layout(){
   draw();
 }
 function draw(){
-  closePop();
+  closePop(); pageChanged();
   const pages = spreadOf(cur), bookEl = $('#book'), stage = $('#stage');
   bookEl.innerHTML = ''; bookEl.classList.toggle('two', pages.length === 2);
   pages.forEach(n => bookEl.appendChild(pageEl(BOOK.pages[n - 1])));
@@ -502,7 +502,7 @@ function pageEl(p){
   return pg;
 }
 function go(d, auto){
-  if(!auto) stopPlay();
+  stopPlay(true);
   if(!$('#qzScrim').hidden) return;
   const pages = spreadOf(cur), N = BOOK.pages.length;
   const n = d > 0 ? pages[pages.length - 1] + 1 : pages[0] - 1;
@@ -690,7 +690,7 @@ function playItem(it, then){
   else start();
 }
 function playPage(){
-  closePop(); queue = buildQueue(); qi = 0;
+  autoplay = true; closePop(); queue = buildQueue(); qi = 0;
   if(!queue.length){ return endOfPage(); }
   playing = true; syncPlayUI(); nextInQueue();
 }
@@ -704,12 +704,19 @@ function endOfPage(){
   clearKara(); item = null;
   const pages = spreadOf(cur), N = BOOK.pages.length;
   if(pages[pages.length - 1] >= N && !pendingFor(pages).length){ stopPlay(); return; }
-  playing = false; autoplay = true; syncPlayUI();
-  go(1, true);
-  setTimeout(() => { if(autoplay && $('#qzScrim').hidden) playPage(); }, 500);
+  // dinleme modu açık kalır: sayfa çevrilince yeni sayfa kendiliğinden okunur
+  playing = false; syncPlayUI();
 }
-function stopPlay(){
-  playing = false; autoplay = false; afterClip = null; clipEnd = null;
+let drawnKey = '';
+function pageChanged(){
+  const k = BOOK ? BOOK.id + ':' + cur : '';
+  if(k === drawnKey) return; drawnKey = k;
+  if(!SES) return;
+  stopPlay(true);
+  if(autoplay) setTimeout(() => { if(autoplay && !playing && $('#qzScrim').hidden && !$('#reader').hidden) playPage(); }, 450);
+}
+function stopPlay(keep){
+  playing = false; if(!keep) autoplay = false; afterClip = null; clipEnd = null;
   try{ AU.pause(); }catch(e){} cancelAnimationFrame(raf); clearKara(); item = null; syncPlayUI();
 }
 function resumeOrPause(){
@@ -891,7 +898,6 @@ function nextQ(){
   quizDone.add(QS.list[QS.i].id);
   if(QS.i < QS.list.length - 1){ QS.i++; return showQ(); }
   $('#qzScrim').hidden = true; const d = QS.done; QS = null; d && d();
-  if(autoplay) setTimeout(() => { if(autoplay && $('#qzScrim').hidden) playPage(); }, 400);
 }
 let returnTo = null;
 function findInBook(q){
