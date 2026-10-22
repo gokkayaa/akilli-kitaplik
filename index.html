@@ -276,6 +276,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 @media (max-width:760px){.tt{padding:6px 8px;font-size:.8rem}}
 
 /* narration */
+.qz .qw{border-radius:5px;transition:background .08s}
+.qz .qw.kara{background:rgba(255,212,59,.65);box-shadow:inset 0 -3px 0 #e0b100}
+.qz .opt.kara{outline:4px solid #ffd43b;outline-offset:2px}
 .nav #playBtn{background:#00adb9;border-color:#00adb9;color:#05292c;font-size:1.25rem}
 .nav #playBtn.on{background:#ffd43b;border-color:#ffd43b;color:#3a2e00}
 .nav #rateBtn{width:auto;min-width:56px;border-radius:999px;font-size:.95rem;padding:0 12px}
@@ -773,6 +776,30 @@ function sayFromBook(btn, which){
   return true;
 }
 
+/* ---------- question audio ---------- */
+const QA = new Audio(); QA.preload = 'auto'; QA.preservesPitch = true; QA.webkitPreservesPitch = true;
+let qaRaf = 0;
+function stopQA(){ try{ QA.pause(); }catch(e){} cancelAnimationFrame(qaRaf); document.querySelectorAll('#qz .kara').forEach(x => x.classList.remove('kara')); }
+function playQ(q){
+  const E = SES && SES._q && SES._q[q.id]; if(!E) return false;
+  stopPlay(true); stopQA();
+  const slow = spd > 0 && E.fy, k = slow ? (E.k || 1) : 1;
+  QA.src = `books/${BOOK.id}/ses/${slow ? E.fy : E.f}`; QA.playbackRate = 1;
+  QA.play().catch(() => {});
+  const loop = () => {
+    const t = QA.currentTime / k, qz = $('#qz');
+    qz.querySelectorAll('.qw').forEach(el => { const x = E.w[+el.dataset.w]; el.classList.toggle('kara', !!x && t >= x[0] - 0.03 && t < x[1] + 0.06); });
+    qz.querySelectorAll('.opt[data-i]').forEach(el => { const x = (E.o || [])[+el.dataset.i]; el.classList.toggle('kara', !!x && t >= x[0] - 0.05 && t < x[1] + 0.25); });
+    if(!QA.paused && !QA.ended) qaRaf = requestAnimationFrame(loop); else qz.querySelectorAll('.kara').forEach(x => x.classList.remove('kara'));
+  };
+  QA.addEventListener('playing', () => { cancelAnimationFrame(qaRaf); qaRaf = requestAnimationFrame(loop); }, {once: true});
+  return true;
+}
+function playFb(key){
+  if(!SES || !SES._fb) return;
+  stopQA(); QA.src = `sesler/${SES._fb}/${key}.mp3`; QA.playbackRate = 1; QA.play().catch(() => {});
+}
+
 /* ---------- teacher mode (board view) ---------- */
 function syncTeach(redraw){
   document.body.classList.toggle('teach', T);
@@ -878,18 +905,24 @@ function showQ(){
   else if(st.state === 'seen'){ fb = `<p class="qz-fb">Haydi, okuyalım ve görelim!</p>`; foot = nextBtn; }
   else if(T && q.type !== 'predict'){ const ready = q.type === 'order' ? st.order.length === q.options.length : st.pick !== null; fb = `<p class="qz-fb">${ready ? 'Herkes hazır mı?' : 'Sınıf ne diyor?'}</p>`; foot = `<button class="qz-btn alt" data-redo>↺</button><button class="qz-btn show" data-show>👀 Cevabı göster</button>`; }
   else if(st.tries === 1){ fb = `<p class="qz-fb no">Bir daha dene!</p>`; }
-  const spk = trVoice ? `<button class="round say" data-say aria-label="Dinle">🔊</button>` : '';
+  const QA_ = SES && SES._q && SES._q[q.id];
+  const spk = (trVoice || QA_) ? `<button class="round say" data-say aria-label="Dinle">🔊</button>` : '';
+  const qText = QA_ ? q.q.split(' ').map((w, i) => `<span class="qw" data-w="${i}">${w}</span>`).join(' ') : q.q;
   qz.innerHTML = `
     <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="${host.name}">` : ''}
       <div class="qz-who"><b>Haydi, cevapla!</b><small>${host.name ? host.name + ' soruyor' : ''} · ${QS.i + 1}/${QS.list.length}</small></div>
       ${st.state === 'open' && q.type !== 'talk' ? '<button class="qz-skip" data-skip>Geç ›</button>' : ''}</div>
-    <div class="qz-q"><p>${q.q}</p><div class="qz-tools">${spk}<button class="round" data-tr aria-pressed="${trOn}" aria-label="Çevir" title="Çevir">文</button></div></div>
+    <div class="qz-q"><p>${qText}</p><div class="qz-tools">${spk}<button class="round" data-tr aria-pressed="${trOn}" aria-label="Çevir" title="Çevir">文</button></div></div>
     ${trOn ? trBlock(q.qt) : ''}
     ${body}${fb}
     ${foot ? `<div class="qz-foot">${foot}</div>` : ''}`;
   $('#qzScrim').hidden = false;
   qz.querySelector('[data-tr]').onclick = () => { st.tr = !st.tr; showQ(); };
-  qz.querySelector('[data-say]')?.addEventListener('click', () => say(q.q));
+  qz.querySelector('[data-say]')?.addEventListener('click', () => { if(!playQ(q)) say(q.q); });
+  // sesli soru: dinleme açıksa kendiliğinden; geri bildirim sesi durum değişince
+  if(QA_ && !st.heard && st.state === 'open' && autoplay){ st.heard = true; setTimeout(() => { if(QS && QS.list[QS.i] === q) playQ(q); }, 350); }
+  const fbKey = st.state === 'ok' ? 'ok' : st.state === 'revealed' ? 'dogru' : st.state === 'seen' ? 'gorelim' : (st.tries === 1 && !T ? 'tekrar' : null);
+  if(fbKey && st.lastFb !== fbKey){ st.lastFb = fbKey; playFb(fbKey === 'ok' ? (Math.random() < .5 ? 'aferin' : 'harika') : fbKey); }
   qz.querySelector('[data-skip]')?.addEventListener('click', nextQ);
   qz.querySelector('[data-next]')?.addEventListener('click', nextQ);
   qz.querySelector('[data-find]')?.addEventListener('click', () => findInBook(q));
@@ -923,6 +956,7 @@ function reveal(q, st){
   showQ();
 }
 function nextQ(){
+  stopQA();
   quizDone.add(QS.list[QS.i].id);
   if(QS.i < QS.list.length - 1){ QS.i++; return showQ(); }
   $('#qzScrim').hidden = true; const d = QS.done; QS = null; d && d();
@@ -936,7 +970,7 @@ function findInBook(q){
 }
 $('#backQ').onclick = () => { $('#backQ').hidden = true; if(returnTo){ cur = returnTo; returnTo = null; draw(); } if(QS) showQ(); };
 function finishCard(){
-  autoplay = false;
+  autoplay = false; setTimeout(() => playFb('tebrikler'), 300);
   $('#qz').className = 'qz';
   const total = BOOK.quiz.filter(q => SCORABLE(q.type)).length, got = sessionStars.size;
   const host = BOOK.host || {};
