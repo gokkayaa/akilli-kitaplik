@@ -783,7 +783,7 @@ function stopQA(){ try{ QA.pause(); }catch(e){} cancelAnimationFrame(qaRaf); doc
 function playQ(q){
   const E = SES && SES._q && SES._q[q.id]; if(!E) return false;
   stopPlay(true); stopQA();
-  const slow = spd > 0 && E.fy, k = slow ? (E.k || 1) : 1;
+  const slow = spd === 2 && E.fy, k = slow ? (E.k || 1) : 1;   // Yavaş: soru doğal sesiyle; Çok yavaş: hafif yavaş dosya
   QA.src = `books/${BOOK.id}/ses/${slow ? E.fy : E.f}`; QA.playbackRate = 1;
   QA.play().catch(() => {});
   const loop = () => {
@@ -987,7 +987,7 @@ function finishCard(){
 $('#qz').addEventListener('click', e => e.stopPropagation());
 
 /* ---------- güncel sürüm kontrolü: tarayıcı eski sayfayı tutuyorsa yenisini yükle ---------- */
-const APPV = '202610222101';
+const APPV = '202610222108';
 fetch('version.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
   if(!j || !j.v || j.v === APPV) return;
   const u = new URL(location.href);
