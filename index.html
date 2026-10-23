@@ -633,9 +633,9 @@ if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
 /* ---------- narration: page player + karaoke + speed ---------- */
 // ses.json: sayfa biçimi  "_p": {no: {f, d, y: {A|B: {f, s: {sid: [o, k]}}}}},  sid: {p, a, b, w}
 //           eski biçim    sid: {f, d, w}  (cümle kaydı)
-// hız: 0 = normal, 1 = Yavaş (A: cümle arası es), 2 = Çok yavaş (B: yavaş ses + es)
-const SPD = [{t: '1×', m: null, r: 1}, {t: 'Yavaş', m: 'A', r: 0.92}, {t: 'Çok yavaş', m: 'B', r: 0.85}];
-let SES = null, playing = false, autoplay = false, spd = Math.min(2, Math.max(0, +store.get('or.spd', 0) || 0)), queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
+// hız: 0 = normal, 1 = Yavaş (A: cümle arası es)
+const SPD = [{t: '1×', m: null, r: 1}, {t: 'Yavaş', m: 'A', r: 0.92}];   // 24 Ekim: Çok yavaş kaldırıldı
+let SES = null, playing = false, autoplay = false, spd = Math.min(SPD.length - 1, Math.max(0, +store.get('or.spd', 0) || 0)), queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
 const AU = new Audio(); AU.preload = 'auto'; AU.preservesPitch = true; AU.mozPreservesPitch = true; AU.webkitPreservesPitch = true;
 async function loadSes(){
   SES = null;
@@ -783,7 +783,7 @@ function stopQA(){ try{ QA.pause(); }catch(e){} cancelAnimationFrame(qaRaf); doc
 function playQ(q){
   const E = SES && SES._q && SES._q[q.id]; if(!E) return false;
   stopPlay(true); stopQA();
-  const slow = spd === 2 && E.fy, k = slow ? (E.k || 1) : 1;   // Yavaş: soru doğal sesiyle; Çok yavaş: hafif yavaş dosya
+  const slow = false, k = 1;   // sorular her kademede doğal sesle   // Yavaş: soru doğal sesiyle; Çok yavaş: hafif yavaş dosya
   QA.src = `books/${BOOK.id}/ses/${slow ? E.fy : E.f}`; QA.playbackRate = 1;
   QA.play().catch(() => {});
   const loop = () => {
@@ -987,7 +987,7 @@ function finishCard(){
 $('#qz').addEventListener('click', e => e.stopPropagation());
 
 /* ---------- güncel sürüm kontrolü: tarayıcı eski sayfayı tutuyorsa yenisini yükle ---------- */
-const APPV = '202610222108';
+const APPV = '202610240344';
 fetch('version.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
   if(!j || !j.v || j.v === APPV) return;
   const u = new URL(location.href);
