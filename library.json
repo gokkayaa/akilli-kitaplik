@@ -204,9 +204,8 @@
      "id": "yolculuk",
      "no": 2,
      "title": "Yolculuk",
-     "ready": false,
-     "pages": 48,
-     "cover": false
+     "ready": true,
+     "pages": 48
     },
     {
      "id": "burasi-istanbul",
