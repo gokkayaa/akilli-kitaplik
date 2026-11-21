@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Akıllı Kitaplık</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a school library wall — teal header band, then shelves of face-out books on planks; tapping a cover opens the reading desk. */
+:root{
+  --desk:#e9f1f2; --desk-2:#dbe8ea; --card:#ffffff; --ink:#15302f; --ink-soft:#4f6a6b;
+  --teal:#00adb9; --teal-deep:#00747c; --teal-wash:rgba(0,173,185,.16); --sun:#ffd43b;
+  --plank:#c9dfe1; --plank-edge:#a9c8cb;
+  --line:rgba(21,48,47,.12); --shadow:0 18px 40px -18px rgba(10,50,55,.45);
+  --f-display:"Baloo 2","Nunito",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#0e1c1e; --desk-2:#16292c; --card:#1b3135; --ink:#e3f1f1; --ink-soft:#9fbcbe;
+  --teal:#2cc6d1; --teal-deep:#6fdde4; --teal-wash:rgba(44,198,209,.22);
+  --plank:#1f3a3e; --plank-edge:#2b4c51;
+  --line:rgba(227,241,241,.14); --shadow:0 18px 40px -18px rgba(0,0,0,.8); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#0e1c1e; --desk-2:#16292c; --card:#1b3135; --ink:#e3f1f1; --ink-soft:#9fbcbe;
+  --teal:#2cc6d1; --teal-deep:#6fdde4; --teal-wash:rgba(44,198,209,.22);
+  --plank:#1f3a3e; --plank-edge:#2b4c51;
+  --line:rgba(227,241,241,.14); --shadow:0 18px 40px -18px rgba(0,0,0,.8); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:15px;margin:0;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ================= LIBRARY ================= */
+/* Layout: wooden bookcase — compact teal header, sticky grade tabs, one wooden shelf per grade with face-out covers on planks. */
+:root{--wall:#f5efe6;--back:#f3e4cc;--back-2:#e9d4b3;--wood:#b47640;--wood-hi:#d49b62;--wood-lo:#6e4220;--label:#fffaf2;--w:clamp(118px,15.5vw,170px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wall:#101c1e;--back:#3a2a1d;--back-2:#302217;--wood:#6b4527;--wood-hi:#8a5c36;--wood-lo:#3a2312;--label:#22343a}}
+:root[data-theme="dark"]{--wall:#101c1e;--back:#3a2a1d;--back-2:#302217;--wood:#6b4527;--wood-hi:#8a5c36;--wood-lo:#3a2312;--label:#22343a}
+#lib{min-height:100%;background:var(--wall)}
+.band{background:#00adb9;color:#05292c;padding:12px 16px}
+.band-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.logo{background:#fff;border-radius:14px;padding:5px 7px;flex:none;display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,60,65,.6)}
+.logo img{height:46px;width:auto;display:block}
+.band h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,4vw,2.3rem);line-height:.95;margin:0;color:#04282b}
+.band p{margin:2px 0 0;font-weight:700;color:#0a4246;font-size:.95rem}
+.tabs{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--wall) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.tabs-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{flex:none;border:2px solid var(--teal);background:var(--card);color:var(--teal-deep);border-radius:999px;padding:6px 16px;font-family:var(--f-display);font-weight:800;font-size:1.05rem;line-height:1.1}
+.tab[aria-current="true"]{background:var(--teal);color:#05292c}
+.wall{max-width:1100px;margin:0 auto;padding:18px 16px 30px}
+.frame{background:linear-gradient(90deg,var(--wood-lo),var(--wood) 6%,var(--wood-hi) 50%,var(--wood) 94%,var(--wood-lo));border-radius:14px;padding:14px;box-shadow:0 24px 40px -22px rgba(60,30,10,.65)}
+.case{background:repeating-linear-gradient(90deg,rgba(90,50,20,.035) 0 2px,transparent 2px 11px),linear-gradient(var(--back),var(--back-2));border-radius:6px;box-shadow:inset 0 10px 18px -8px rgba(60,30,10,.45),inset 0 0 0 1px rgba(60,30,10,.25);overflow:hidden}
+.shelf{position:relative;padding:12px 0 18px;scroll-margin-top:64px}
+.shelf+.shelf{box-shadow:inset 0 1px 0 rgba(110,66,32,.12)}
+.shelf-h{display:flex;align-items:center;gap:8px;padding:0 16px}
+.plaque{background:#00adb9;color:#04282b;font-family:var(--f-display);font-weight:800;font-size:1.15rem;line-height:1;padding:6px 12px 5px;border-radius:6px;box-shadow:0 3px 0 #00747c,0 6px 10px -6px rgba(0,0,0,.4)}
+.lvl{background:var(--label);color:var(--ink-soft);border-radius:999px;padding:3px 10px;font-weight:800;font-size:.78rem}
+.row{display:flex;gap:clamp(14px,2.4vw,28px);padding:12px 18px 18px;overflow-x:auto;}
+.row::before,.row::after{content:"";flex:1 0 0}
+.row{scroll-snap-type:x proximity;scroll-padding-inline:18px;scrollbar-width:thin;position:relative;z-index:1}
+/* plank: sits right under the covers; cover height = width × 624/680 */
+.rw{position:relative}
+.rw::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18px;
+  background:linear-gradient(var(--wood-hi),var(--wood) 55%,var(--wood-lo));box-shadow:0 10px 14px -8px rgba(60,30,10,.6);z-index:0}
+.bk{flex:none;width:var(--w);display:flex;flex-direction:column;border:0;background:none;padding:0;text-align:left;scroll-snap-align:start}
+.cover{position:relative;border-radius:3px 7px 7px 3px;overflow:hidden;background:#fff;transform-origin:bottom center;
+  box-shadow:0 12px 14px -10px rgba(40,20,5,.7),inset 5px 0 0 rgba(0,0,0,.06);transition:transform .25s cubic-bezier(.2,.8,.3,1.2),box-shadow .25s}
+.cover img{display:block;width:100%;aspect-ratio:680/624;object-fit:cover}
+.cover::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:linear-gradient(90deg,rgba(0,0,0,.14),transparent);z-index:1}
+.bk.ready:hover .cover,.bk.ready:focus-visible .cover{transform:translateY(-6px) scale(1.03);box-shadow:0 22px 22px -14px rgba(40,20,5,.7)}
+.bk.soon{cursor:default}
+.bk.soon .cover img{filter:saturate(.3) opacity(.7)}
+.ph{aspect-ratio:680/624;display:grid;place-items:center;padding:10px;background:repeating-linear-gradient(135deg,#efe6d8 0 12px,#e5d8c4 12px 24px);text-align:center}
+.ph span{font-family:var(--f-display);font-weight:800;font-size:.95rem;line-height:1.1;color:#6b5a44;background:#fffaf2;border-radius:8px;padding:6px 8px}
+.ribbon{position:absolute;top:8px;right:-3px;background:var(--ink);color:var(--card);font-weight:800;font-size:.7rem;padding:3px 8px 3px 10px;border-radius:999px 0 0 999px;z-index:2}
+.cap{margin-top:8px;flex:1;background:var(--label);border-radius:8px;padding:6px 8px 7px;box-shadow:0 2px 6px -3px rgba(60,30,10,.4);display:grid;gap:5px;min-height:62px;align-content:start}
+.bt{font-family:var(--f-display);font-weight:800;font-size:.95rem;line-height:1.1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink)}
+.bt span{color:var(--teal-deep);margin-right:3px}
+.meta{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;border-radius:99px;background:rgba(110,66,32,.15);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:99px}
+.done{color:#0b7a3b}
+.star{background:rgba(255,212,59,.45);color:var(--ink);border-radius:99px;padding:0 6px}
+.hello{display:none}
+.cnt{margin-left:10px;opacity:.55;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cnt b{font-weight:800}
+.foot{max-width:1100px;margin:0 auto;padding:0 16px 30px;color:var(--ink-soft);font-size:.82rem;font-weight:700}
+@media (max-width:760px){.frame{padding:9px;border-radius:10px}.wall{padding-inline:10px}.logo img{height:38px}.band p{font-size:.85rem}}
+
+/* ================= READER ================= */
+#reader{height:100%;display:flex;flex-direction:column;padding-inline:16px}
+.rbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding-block:12px 10px}
+.back{border:0;background:var(--teal);color:#062a2d;border-radius:999px;padding:7px 14px 7px 10px;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+.rtitle{font-family:var(--f-display);font-weight:800;font-size:1.4rem;line-height:1;margin:0 auto 0 4px;min-width:0}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:flex;background:var(--desk-2);border-radius:999px;padding:3px;gap:2px}
+.chip{border:0;background:transparent;border-radius:999px;padding:6px 12px;font-weight:800;font-size:.85rem;color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--teal);color:#062a2d}
+.tbtn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.85rem;display:inline-flex;gap:6px;align-items:center}
+.tbtn[aria-pressed="true"]{border-color:var(--teal);color:var(--teal-deep)}
+.count{background:var(--sun);color:#3a2e00;border-radius:999px;min-width:22px;padding:0 6px;font-size:.78rem;text-align:center;font-variant-numeric:tabular-nums}
+
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative}
+.book{display:flex;box-shadow:var(--shadow);border-radius:6px;overflow:hidden;background:#fff;max-width:100%}
+.page{position:relative;aspect-ratio:680.31/623.62;height:100%;flex:none}
+.page img{display:block;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.page+.page::before{content:"";position:absolute;inset:0 auto 0 0;width:28px;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,0))}
+.book.two .page:first-child::after{content:"";position:absolute;inset:0 0 0 auto;width:22px;pointer-events:none;background:linear-gradient(270deg,rgba(0,0,0,.12),rgba(0,0,0,0))}
+
+.hit{position:absolute;border:0;padding:0;margin:0;background:transparent;border-radius:6px;z-index:2;-webkit-tap-highlight-color:transparent;transition:background-color .15s}
+.hints .hit{box-shadow:inset 0 -3px 0 rgba(0,173,185,.55)}
+.hints .hit.banner{box-shadow:none;outline:2px dashed rgba(0,173,185,.7);outline-offset:-2px;border-radius:14px}
+.hit:hover{background:var(--teal-wash)}
+.hit.sent{background:rgba(255,212,59,.22)}
+.hit.on{background:rgba(0,173,185,.32);box-shadow:inset 0 -3px 0 #00adb9}
+.hit.banner.on{background:rgba(0,173,185,.18)}
+
+.nav{display:flex;justify-content:center;align-items:center;gap:14px;padding-block:8px 12px}
+.nav button{border:1px solid var(--line);background:var(--card);width:46px;height:46px;border-radius:50%;font-size:1.4rem;font-weight:800;line-height:1}
+.nav button:disabled{opacity:.35;cursor:default}
+.nav #pno{width:auto;min-width:104px;height:46px;border-radius:999px;font-size:1rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums;padding:0 14px}
+.tip{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font-weight:800;box-shadow:var(--shadow);z-index:3;white-space:nowrap;font-size:.95rem;transition:opacity .4s}
+.tip.gone{opacity:0;pointer-events:none}
+
+.pop{position:fixed;z-index:20;width:min(360px, calc(100vw - 24px));background:var(--card);color:var(--ink);border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--line);padding:14px 16px;max-height:min(70vh,560px);overflow:auto}
+.pop-h{display:flex;align-items:flex-start;gap:8px}
+.pop-w{font-family:var(--f-display);font-weight:800;font-size:1.7rem;line-height:1.05;margin:0;flex:1;min-width:0;overflow-wrap:anywhere}
+.round{border:0;background:var(--desk-2);width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:1.05rem}
+.round.say{background:var(--teal);color:#062a2d}
+.note{margin:4px 0 0;color:var(--ink-soft);font-weight:700;font-size:.88rem}
+.cog{display:inline-flex;gap:6px;align-items:center;margin-top:8px;background:rgba(255,212,59,.28);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:800}
+.tr{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.wrow{display:flex;gap:12px;align-items:flex-start}
+.wrow .tr{flex:1;min-width:0}
+.wpic{width:96px;height:96px;border-radius:14px;object-fit:cover;flex:none;margin-top:12px;border:1px solid var(--line);background:#fff}
+.bag li.pic{grid-template-columns:auto 1fr auto}
+.bag li img{grid-row:1/span 2;width:44px;height:44px;border-radius:10px;object-fit:cover}
+.bag li.pic small{grid-column:2}
+.bag li.pic button{grid-column:3}
+.clear{margin-top:12px;border:1px solid var(--line);background:var(--desk);border-radius:12px;padding:10px;font-weight:800;color:var(--ink-soft)}
+.clear.sure{background:#d9534f;border-color:#d9534f;color:#fff}
+@media (max-width:560px){.wpic{width:72px;height:72px}}
+.tr li{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:baseline}
+.tr .lb{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-deep)}
+.tr .tx{font-size:1.08rem;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.act{flex:1;border:1px solid var(--line);background:var(--desk);border-radius:12px;padding:9px 10px;font-weight:800;font-size:.88rem;white-space:nowrap}
+.act[aria-pressed="true"],.act.done{border-color:var(--teal);color:var(--teal-deep);background:var(--teal-wash)}
+.sentbox{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+.sentbox .tq{font-family:var(--f-display);font-weight:700;font-size:1.15rem;line-height:1.25;display:flex;gap:8px;align-items:flex-start}
+.sentbox .tq span{flex:1}
+.sentbox .tr .tx{font-size:.98rem;font-weight:600}
+
+.scrim{position:fixed;inset:0;background:rgba(5,25,27,.4);z-index:30}
+.drawer{position:fixed;z-index:31;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--card);color:var(--ink);box-shadow:var(--shadow);display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.drawer h2{font-family:var(--f-display);font-weight:800;font-size:1.5rem;margin:0;flex:1}
+.dh{display:flex;align-items:center;gap:10px}
+.drawer p{color:var(--ink-soft);margin:6px 0 12px}
+.bag{list-style:none;margin:0;padding:0;overflow:auto;display:grid;gap:8px;align-content:start}
+.bag li{border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.bag b{font-family:var(--f-display);font-size:1.15rem}
+.bag small{grid-column:1;color:var(--ink-soft);font-weight:700;font-size:.85rem}
+.bag button{grid-row:1/span 2;grid-column:2;align-self:center;border:0;background:var(--desk-2);border-radius:10px;padding:6px 10px;font-weight:800;font-size:.8rem}
+.bag .empty{display:block;border:2px dashed var(--line);border-radius:16px;padding:22px;text-align:center;color:var(--ink-soft);font-weight:700}
+
+/* quiz: Haydi, cevapla! */
+.qz-scrim{position:fixed;inset:0;z-index:40;background:rgba(5,25,27,.45);display:grid;place-items:center;padding:16px}
+.qz{position:relative;width:min(520px,100%);max-height:calc(100% - 8px);overflow:auto;background:var(--card);color:var(--ink);border-radius:24px;box-shadow:var(--shadow);padding:18px 20px 18px;animation:qzIn .35s cubic-bezier(.2,.8,.3,1.2)}
+@keyframes qzIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.qz-h{display:flex;align-items:center;gap:12px}
+.ava{width:62px;height:62px;border-radius:50%;object-fit:cover;flex:none;border:3px solid #00adb9;background:#fff}
+.qz-who{flex:1;min-width:0}
+.qz-who b{display:block;font-family:var(--f-display);font-weight:800;font-size:1.35rem;line-height:1;color:var(--teal-deep)}
+.qz-who small{font-weight:800;color:var(--ink-soft);font-size:.82rem}
+.qz-skip{border:0;background:none;color:var(--ink-soft);font-weight:800;font-size:.85rem;padding:6px 4px}
+.qz-q{display:flex;gap:10px;align-items:flex-start;margin:14px 0 6px;background:var(--desk);border-radius:18px;padding:12px 14px;position:relative}
+.qz-q::before{content:"";position:absolute;left:22px;top:-9px;border:9px solid transparent;border-top:0;border-bottom-color:var(--desk)}
+.qz-q p{margin:0;flex:1;font-family:var(--f-display);font-weight:700;font-size:1.35rem;line-height:1.2;text-wrap:balance}
+.qz-tools{display:flex;gap:6px;flex:none}
+.qz-tr{list-style:none;margin:6px 0 4px;padding:0 4px;display:grid;gap:4px}
+.qz-tr li{display:grid;grid-template-columns:84px 1fr;gap:10px;font-weight:700;font-size:.95rem}
+.qz-tr li span:first-child{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-deep);padding-top:2px}
+.qz-opts{display:grid;gap:10px;margin-top:12px}
+.qz-opts.row3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.qz-opts.row2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:12px 10px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;line-height:1.1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0;transition:transform .12s,border-color .15s,background-color .15s}
+.opt small{font-family:var(--f-body);font-size:.75rem;font-weight:700;color:var(--ink-soft);overflow-wrap:anywhere}
+.opt img{width:78px;height:78px;border-radius:50%;object-fit:cover}
+.opt:not(:disabled):hover{border-color:#00adb9;transform:translateY(-2px)}
+.opt:disabled{cursor:default}
+.opt.pick{border-color:#00adb9;background:var(--teal-wash)}
+.opt.ok{border-color:#2f9e5b;background:rgba(47,158,91,.16)}
+.opt.no{border-color:#d9534f;background:rgba(217,83,79,.14);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.slot{border:2px dashed var(--line);border-radius:14px;min-height:54px;display:grid;place-items:center;padding:6px;font-weight:800;text-align:center;font-size:.92rem;position:relative}
+.slot i{position:absolute;top:4px;left:8px;font-style:normal;font-size:.7rem;color:var(--ink-soft)}
+.slot.full{border-style:solid;border-color:#00adb9;background:var(--teal-wash)}
+.qz-fb{min-height:1.6em;margin:14px 0 0;font-family:var(--f-display);font-weight:800;font-size:1.3rem;text-align:center}
+.qz-fb.ok{color:#2f9e5b}.qz-fb.no{color:#d9534f}
+.qz-fb small{display:block;font-family:var(--f-body);font-size:.9rem;color:var(--ink-soft)}
+.qz-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}
+.qz-btn{border:0;border-radius:999px;padding:10px 18px;font-weight:800;font-size:.95rem}
+.qz-btn.main{background:#00adb9;color:#05292c}
+.qz-btn.alt{background:var(--desk-2)}
+.stars{font-size:2.2rem;text-align:center;margin:8px 0 0;letter-spacing:.1em}
+.qz.wide{width:min(760px,100%)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:14px}
+.pg{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:4px;display:flex;flex-direction:column;gap:4px;align-items:center;font-weight:800;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.pg img{width:100%;aspect-ratio:680/624;object-fit:contain;background:var(--desk);border-radius:6px;display:block}
+.pg.on{border-color:#00adb9;color:var(--teal-deep);background:var(--teal-wash)}
+.pg:hover{border-color:#00adb9}
+.choose{display:grid;gap:10px;margin-top:16px}
+.choose .qz-btn{padding:14px 18px;font-size:1.05rem;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.cover-sm{width:84px;border-radius:4px 10px 10px 4px;box-shadow:0 8px 16px -10px rgba(10,50,55,.6);flex:none}
+#pno{cursor:pointer;border-radius:999px;padding:6px 10px;background:var(--card);border:1px solid var(--line)}
+#pno:hover{border-color:#00adb9}
+.back-q{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:5;border:0;background:#00adb9;color:#05292c;border-radius:999px;padding:10px 18px;font-weight:800;box-shadow:var(--shadow)}
+.hit.proof{background:rgba(255,212,59,.45);box-shadow:inset 0 -3px 0 #e0b100}
+@media (max-width:560px){.qz-q p{font-size:1.15rem}.opt{font-size:1.05rem;padding:10px 6px}.opt img{width:60px;height:60px}.qz-opts.row3{gap:6px}.slots{grid-template-columns:repeat(2,minmax(0,1fr))}.ava{width:52px;height:52px}}
+@media (max-width:560px){#fsBtn{display:none}.rtitle{font-size:1.15rem}.chip{padding:6px 10px}.tr li{grid-template-columns:78px 1fr}.tr .lb{font-size:.66rem}}
+
+/* ================= TEACHER MODE ================= */
+#teachBtn[aria-pressed="true"]{background:#00adb9;border-color:#00adb9;color:#05292c}
+.ttools{display:none;gap:2px;background:var(--desk-2);border-radius:999px;padding:3px}
+.teach .ttools{display:flex}
+.tt{border:0;background:transparent;border-radius:999px;padding:6px 11px;font-weight:800;font-size:.88rem;color:var(--ink-soft);white-space:nowrap}
+.tt[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 2px 6px -3px rgba(0,0,0,.4)}
+.tt.pen[aria-pressed="true"]{color:#d6336c}.tt.hl[aria-pressed="true"]{color:#b08900}.tt.veil[aria-pressed="true"]{color:var(--teal-deep)}
+.teach #bagBtn,.teach .seg,.teach #tip{display:none!important}
+.teach .rbar{padding-block:8px 6px}
+.teach #reader{padding-inline:8px}
+.teach .nav{position:fixed;inset:auto 0 10px 0;padding:0;pointer-events:none;z-index:6}
+.teach .nav #pno{pointer-events:auto;opacity:.85}
+.teach .nav #prev,.teach .nav #next{pointer-events:auto;position:fixed;top:50%;transform:translateY(-50%);width:64px;height:64px;font-size:2rem;opacity:.8;box-shadow:var(--shadow)}
+.teach .nav #prev{left:6px}.teach .nav #next{right:6px}
+.teach .stage{padding-bottom:58px}
+.ink{position:absolute;inset:0;z-index:4;pointer-events:none;touch-action:none}
+.drawing .ink{pointer-events:auto;cursor:crosshair}
+.book{position:relative}
+.hit.veiled{background:#00adb9!important;box-shadow:inset 0 0 0 2px #00747c!important;border-radius:6px;outline:0!important}
+.hit.veiled::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:#04282b;font-family:var(--f-display);font-weight:800;font-size:clamp(.8rem,1.6vw,1.4rem)}
+.veiling .hit{cursor:pointer}
+.veiling .hit:hover{background:rgba(0,173,185,.35)}
+/* bigger cards on the board */
+.teach .pop{width:min(560px,calc(100vw - 24px));padding:18px 22px}
+.teach .pop-w{font-size:2.6rem}
+.teach .note{font-size:1.05rem}
+.teach .tr li{grid-template-columns:120px 1fr}
+.teach .tr .lb{font-size:.9rem}
+.teach .tr .tx{font-size:1.6rem}
+.teach .wpic{width:140px;height:140px}
+.teach .sentbox .tq{font-size:1.5rem}
+.teach .sentbox .tr .tx{font-size:1.25rem}
+.teach .qz{width:min(900px,100%);padding:24px 28px}
+.teach .qz.wide{width:min(980px,100%)}
+.teach .qz-q p{font-size:2rem}
+.teach .ava{width:84px;height:84px}
+.teach .qz-who b{font-size:1.7rem}
+.teach .opt{font-size:1.7rem;padding:16px 12px;position:relative}
+.teach .opt img{width:110px;height:110px}
+.teach .qz-tr li{font-size:1.2rem;grid-template-columns:110px 1fr}
+.teach .slot{font-size:1.2rem;min-height:70px}
+.teach .qz-fb{font-size:1.8rem}
+.teach .qz-btn{font-size:1.15rem;padding:12px 22px}
+.abc{position:absolute;top:6px;left:8px;width:30px;height:30px;border-radius:50%;background:var(--desk-2);color:var(--ink);font-family:var(--f-body);font-size:1rem;font-weight:800;display:grid;place-items:center}
+.opt.ok .abc{background:#2f9e5b;color:#fff}.opt.no .abc{background:#d9534f;color:#fff}.opt.pick .abc{background:#00adb9;color:#05292c}
+.qz-btn.show{background:#ffd43b;color:#3a2e00}
+@media (max-width:760px){.tt{padding:6px 8px;font-size:.8rem}}
+
+/* narration */
+.qz .qw{border-radius:5px;transition:background .08s}
+.qz .qw.kara{background:rgba(255,212,59,.65);box-shadow:inset 0 -3px 0 #e0b100}
+.qz .opt.kara{outline:4px solid #ffd43b;outline-offset:2px}
+.nav #playBtn{background:#00adb9;border-color:#00adb9;color:#05292c;font-size:1.25rem}
+.nav #playBtn.on{background:#ffd43b;border-color:#ffd43b;color:#3a2e00}
+.nav #rateBtn{width:auto;min-width:56px;border-radius:999px;font-size:.95rem;padding:0 12px}
+.nav #rateBtn[aria-pressed="true"]{border-color:#00adb9;color:var(--teal-deep);background:var(--teal-wash)}
+.teach .nav #playBtn,.teach .nav #rateBtn{pointer-events:auto}
+.hit.splay{background:rgba(0,173,185,.13)}
+.hit.kara{background:rgba(255,212,59,.62)!important;box-shadow:inset 0 -3px 0 #e0b100!important;border-radius:5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.ic{width:1.2em;height:1.2em;flex:none;vertical-align:-.22em;pointer-events:none}
+.tbtn,.tt,.back,.act,.qz-btn,.back-q{display:inline-flex;align-items:center;gap:6px}
+.round .ic{width:1.25em;height:1.25em}
+.nav #prev,.nav #next{display:inline-grid;place-items:center}
+.nav #playBtn{width:auto!important;padding:0 20px 0 16px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:1.1rem;box-shadow:0 3px 0 #00747c}
+.nav #playBtn .ic{width:1.3em;height:1.3em}
+.nav #sfxBtn{display:inline-grid;place-items:center}
+.nav #sfxBtn[aria-pressed="false"]{opacity:.55}
+.stars .ic{color:#ffc21a;width:1.6em;height:1.6em}.stars .off{color:#c9d6d7}
+.qz-fb.ok .ic{width:1.3em;height:1.3em}
+.cog .ic,.star .ic{color:#e0a800}
+/* oynat ipucu */
+.playtip{position:fixed;z-index:60;background:#15302f;color:#fff;font-weight:800;padding:8px 14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;animation:tipb 1.2s ease-in-out infinite alternate}
+.playtip::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:#15302f}
+@keyframes tipb{to{transform:translateY(-4px)}}
+/* alt yazi */
+.subbar{position:relative;margin:4px auto 0;max-width:min(980px,96vw);background:var(--card);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08);padding:8px 14px;font-size:.98rem;line-height:1.35}
+.subbar b{display:block;font-family:var(--f-display);font-size:1.12rem;color:var(--ink)}
+.subbar span{display:block;color:var(--ink-soft)} .subbar i{font-style:normal;font-weight:800;color:var(--teal-deep);margin-right:6px;font-size:.8rem}
+.teach .subbar{font-size:1.2rem}.teach .subbar b{font-size:1.45rem}
+#trBtn .lbl{font-weight:800}
+/* sayfa katlanma */
+.foldwrap{position:absolute;pointer-events:none;z-index:5;overflow:hidden;will-change:transform}
+.foldwrap > .book{position:absolute;top:0;margin:0;height:100%!important}
+.foldwrap.fwd{transform-origin:left center;animation:foldF .45s cubic-bezier(.45,0,.75,.4) forwards}
+.foldwrap.back{transform-origin:right center;animation:foldB .45s cubic-bezier(.45,0,.75,.4) forwards}
+@keyframes foldF{0%{transform:perspective(1800px) rotateY(0);filter:brightness(1)}100%{transform:perspective(1800px) rotateY(-90deg);filter:brightness(.55)}}
+@keyframes foldB{0%{transform:perspective(1800px) rotateY(0);filter:brightness(1)}100%{transform:perspective(1800px) rotateY(90deg);filter:brightness(.55)}}
+@media (prefers-reduced-motion:reduce){.foldwrap{display:none}}
+</style>
+
+<!-- LIBRARY -->
+<div id="lib">
+  <header class="band">
+    <div class="band-in">
+      <div class="logo"><img src="assets/maarif-logo.png" alt="Türkiye Maarif Vakfı"></div>
+      <div><h1>Akıllı Kitaplık</h1><p>Etkileşimli Türkçe okuma kitapları</p></div>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Sınıflar"><div class="tabs-in" id="tabs"></div></nav>
+  <main class="wall" id="wallWrap"><div class="frame"><div class="case" id="wall"></div></div></main>
+  <p class="foot">Kitaplar: Türkiye Maarif Vakfı Yayınları · Türkçe Okuma Kitabı serisi <span class="cnt" id="cnt" hidden title="Kitaplığın açılma sayısı"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,168a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z"/></svg> <b></b></span></p>
+</div>
+
+<!-- READER -->
+<div id="reader" hidden>
+  <header class="rbar">
+    <button class="back" id="backBtn"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm10,47.38-3.35-15.9,46.82-10.06,3.34,15.9Zm70,100.41-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm48,160H56V192h48v16Z"/></svg>Raf</button>
+    <h2 class="rtitle" id="rTitle"></h2>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Diller">
+        <button class="chip" id="lang-en" data-lang="en">EN</button>
+        <button class="chip" id="lang-ky" data-lang="ky">KG</button>
+        <button class="chip" id="lang-ru" data-lang="ru">RU</button>
+      </div>
+      <button class="tbtn" id="hintBtn">İpucu</button>
+      <button class="tbtn" id="quizBtn" title="Haydi, cevapla! soruları">Sorular</button>
+      <button class="tbtn" id="trBtn" title="Cümle çevirisi"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48ZM56,128H72a8,8,0,0,1,0,16H56a8,8,0,0,1,0-16Zm96,48H56a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Zm48,0H184a8,8,0,0,1,0-16h16a8,8,0,0,1,0,16Zm0-32H104a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Z"/></svg><span class="lbl">Cümle: Kapalı</span></button>
+      <button class="tbtn" id="bagBtn"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,208H48V48H80Zm96-56H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z"/></svg>Defterim <span class="count" id="bagCount">0</span></button>
+      <div class="ttools" role="group" aria-label="Öğretmen araçları">
+        <button class="tt" data-tool="tap" aria-pressed="true"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,104v50.93c0,46.2-36.85,84.55-83,85.06A83.71,83.71,0,0,1,80.6,215.4C58.79,192.33,34.15,136,34.15,136a16,16,0,0,1,6.53-22.23c7.66-4,17.1-.84,21.4,6.62l21,36.44a6.09,6.09,0,0,0,6,3.09l.12,0A8.19,8.19,0,0,0,96,151.74V32a16,16,0,0,1,16.77-16c8.61.4,15.23,7.82,15.23,16.43V104a8,8,0,0,0,8.53,8,8.17,8.17,0,0,0,7.47-8.25V88a16,16,0,0,1,16.77-16c8.61.4,15.23,7.82,15.23,16.43V112a8,8,0,0,0,8.53,8,8.17,8.17,0,0,0,7.47-8.25v-7.28c0-8.61,6.62-16,15.23-16.43A16,16,0,0,1,224,104Z"/></svg>Dokun</button>
+        <button class="tt pen" data-tool="pen" aria-pressed="false"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM192,108.68,147.31,64l24-24L216,84.68Z"/></svg>Kalem</button>
+        <button class="tt hl" data-tool="hl" aria-pressed="false"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M253.66,106.34a8,8,0,0,0-11.32,0L192,156.69,107.31,72l50.35-50.34a8,8,0,1,0-11.32-11.32L96,60.69A16,16,0,0,0,93.18,79.5L72,100.69a16,16,0,0,0,0,22.62L76.69,128,18.34,186.34a8,8,0,0,0,3.13,13.25l72,24A7.88,7.88,0,0,0,96,224a8,8,0,0,0,5.66-2.34L136,187.31l4.69,4.69a16,16,0,0,0,22.62,0l21.18-21.18A16,16,0,0,0,203.31,168l50.35-50.34A8,8,0,0,0,253.66,106.34ZM152,180.69,83.31,112,104,91.31,172.69,160Z"/></svg>Fosforlu</button>
+        <button class="tt veil" data-tool="veil" aria-pressed="false"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M96.68,57.87a4,4,0,0,1,2.08-6.6A130.13,130.13,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41a8,8,0,0,1,0,6.5c-.35.79-8.82,19.57-27.65,38.4q-4.28,4.26-8.79,8.07a4,4,0,0,1-5.55-.36ZM213.92,210.62a8,8,0,1,1-11.84,10.76L180,197.13A127.21,127.21,0,0,1,128,208c-34.88,0-66.57-13.26-91.66-38.34C17.51,150.83,9,132.05,8.69,131.26a8,8,0,0,1,0-6.5C9,124,17.51,105.18,36.34,86.35a135,135,0,0,1,25-19.78L42.08,45.38A8,8,0,1,1,53.92,34.62Zm-65.49-48.25-52.69-58a40,40,0,0,0,52.69,58Z"/></svg>Perde</button>
+        <button class="tt" id="wipeBtn"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M225,80.4,183.6,39a24,24,0,0,0-33.94,0L31,157.66a24,24,0,0,0,0,33.94l30.06,30.06A8,8,0,0,0,66.74,224H216a8,8,0,0,0,0-16h-84.7L225,114.34A24,24,0,0,0,225,80.4ZM213.67,103,160,156.69,107.31,104,161,50.34a8,8,0,0,1,11.32,0l41.38,41.38a8,8,0,0,1,0,11.31Z"/></svg>Sil</button>
+      </div>
+      <button class="tbtn" id="teachBtn" aria-pressed="false" title="Akıllı tahta için büyük görünüm"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H53.39a8,8,0,0,0,7.23-4.57,48,48,0,0,1,86.76,0,8,8,0,0,0,7.23,4.57H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM104,168a32,32,0,1,1,32-32A32,32,0,0,1,104,168Zm112,32H159.43a63.93,63.93,0,0,0-13.16-16H192a8,8,0,0,0,8-8V80a8,8,0,0,0-8-8H64a8,8,0,0,0-8,8v96a8,8,0,0,0,6,7.75A63.72,63.72,0,0,0,48.57,200H40V56H216Z"/></svg>Öğretmen</button>
+      <button class="tbtn" id="fsBtn" title="Tam ekran" aria-label="Tam ekran"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M109.66,146.34a8,8,0,0,1,0,11.32L83.31,184l18.35,18.34A8,8,0,0,1,96,216H48a8,8,0,0,1-8-8V160a8,8,0,0,1,13.66-5.66L72,172.69l26.34-26.35A8,8,0,0,1,109.66,146.34ZM83.31,72l18.35-18.34A8,8,0,0,0,96,40H48a8,8,0,0,0-8,8V96a8,8,0,0,0,13.66,5.66L72,83.31l26.34,26.35a8,8,0,0,0,11.32-11.32ZM208,40H160a8,8,0,0,0-5.66,13.66L172.69,72,146.34,98.34a8,8,0,0,0,11.32,11.32L184,83.31l18.34,18.35A8,8,0,0,0,216,96V48A8,8,0,0,0,208,40Zm3.06,112.61a8,8,0,0,0-8.72,1.73L184,172.69l-26.34-26.35a8,8,0,0,0-11.32,11.32L172.69,184l-18.35,18.34A8,8,0,0,0,160,216h48a8,8,0,0,0,8-8V160A8,8,0,0,0,211.06,152.61Z"/></svg></button>
+    </div>
+  </header>
+  <main class="stage" id="stage">
+    <div class="book" id="book"></div>
+    <div class="tip gone" id="tip">Haydi, kelimeye dokun!</div>
+    <button class="back-q" id="backQ" hidden><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,48V208a8,8,0,0,1-13.66,5.66l-80-80a8,8,0,0,1,0-11.32l80-80A8,8,0,0,1,168,48Z"/></svg>Soruya dön</button>
+  </main>
+  <div class="subbar" id="subbar" hidden></div>
+  <nav class="nav" aria-label="Sayfalar">
+    <button id="prev" aria-label="Önceki sayfa"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,48V208a8,8,0,0,1-13.66,5.66l-80-80a8,8,0,0,1,0-11.32l80-80A8,8,0,0,1,168,48Z"/></svg></button>
+    <button id="pno" title="Sayfa seç" aria-label="Sayfa seç"></button>
+    <button id="next" aria-label="Sonraki sayfa"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>
+    <button id="playBtn" hidden aria-label="Sesli dinle"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg><span>Sesli dinle</span></button>
+    <button id="rateBtn" hidden aria-pressed="false" title="Yavaş oku">1×</button>
+    <button id="sfxBtn" aria-pressed="true" title="Sayfa çevirme sesi" aria-label="Sayfa çevirme sesi"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"/></svg></button>
+  </nav>
+</div>
+
+<div class="pop" id="pop" hidden role="dialog" aria-label="Kelime"></div>
+<div class="qz-scrim" id="qzScrim" hidden><div class="qz" id="qz" role="dialog" aria-label="Haydi, cevapla!"></div></div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Kelime Defterim">
+  <div class="dh"><h2>Kelime Defterim</h2><button class="round" id="bagClose" aria-label="Kapat"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></button></div>
+  <p>Dokun, öğren, topla!</p>
+  <ul class="bag" id="bagList"></ul>
+  <button class="clear" id="bagClear" hidden>Temizle</button>
+</aside>
+
+<script>
+const $ = s => document.querySelector(s);
+const ICO = {"play": "<svg class=\"ic\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z\"/></svg>", "pause": "<svg class=\"ic\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M216,48V208a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V48a16,16,0,0,1,16-16h40A16,16,0,0,1,216,48ZM96,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V48A16,16,0,0,0,96,32Z\"/></svg>", "sOn": "<svg class=\"ic\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z\"/></svg>", "sOff": "<svg class=\"ic\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M221.92,210.62a8,8,0,1,1-11.84,10.76L168,175.09v48.6a8.29,8.29,0,0,1-3.91,7.18,8,8,0,0,1-9-.56L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H81.55L50.08,45.38A8,8,0,0,1,61.92,34.62ZM200.53,160a8.17,8.17,0,0,0,7.47-8.25V104.27A8.17,8.17,0,0,0,200.53,96a8,8,0,0,0-8.53,8v48A8,8,0,0,0,200.53,160ZM161,119.87a4,4,0,0,0,7-2.7V32.24a8.25,8.25,0,0,0-2.88-6.39,8,8,0,0,0-10-.16L111.83,59.33a4,4,0,0,0-.5,5.85ZM231.47,80A8.17,8.17,0,0,0,224,88.27v79.46a8.17,8.17,0,0,0,7.47,8.25,8,8,0,0,0,8.53-8V88A8,8,0,0,0,231.47,80Z\"/></svg>", "head": "<svg class=\"ic\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M232,128v56a24,24,0,0,1-24,24H192a24,24,0,0,1-24-24V144a24,24,0,0,1,24-24h23.65a87.71,87.71,0,0,0-87-80H128a88,88,0,0,0-87.64,80H64a24,24,0,0,1,24,24v40a24,24,0,0,1-24,24H48a24,24,0,0,1-24-24V128A104.11,104.11,0,0,1,201.89,54.66,103.41,103.41,0,0,1,232,128Z\"/></svg>"};
+
+const LBL = {en:'English', ky:'Кыргызча', ru:'Русский'};
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let LIB = null, BOOK = null;
+let langs = store.get('or.langs', ['en','ky','ru']);
+let hints = store.get('or.hints', true);
+let bag = [], cur = 1, active = null, showSent = false, two = false;
+let T = store.get('or.teach', false), tool = 'tap';
+let trMode = store.get('or.trmode', 'off'), subSid = null;
+const TRM = {off:'Kapalı', card:'Kartta', bar:'Altta'};
+function syncTr(){
+  $('#trBtn .lbl').textContent = 'Cümle: ' + TRM[trMode]; $('#trBtn').setAttribute('aria-pressed', trMode !== 'off');
+  const sb = $('#subbar'), was = sb.hidden; sb.hidden = trMode !== 'bar';
+  if(!sb.hidden && !subSid) sb.innerHTML = '<span>Bir kelimeye dokun ya da “Sesli dinle”ye bas: cümlenin çevirisi burada görünür.</span>';
+  if(was !== sb.hidden && BOOK) layout();
+}
+function showSub(sid){
+  if(trMode !== 'bar' || !BOOK || !BOOK.sent[sid] || sid === subSid) return;
+  subSid = sid; const s = BOOK.sent[sid];
+  $('#subbar').innerHTML = `<b>${s.tr}</b>` + (T ? ['en','ky','ru'] : langs).map(l => `<span><i>${l === 'ky' ? 'KG' : l.toUpperCase()}</i>${s[l]}</span>`).join('');
+}
+
+/* ---------- library ---------- */
+async function loadLib(){
+  if(LIB) return LIB;
+  LIB = await (await fetch('library.json')).json();
+  return LIB;
+}
+function renderLib(){
+  const wall = $('#wall');
+  wall.innerHTML = LIB.shelves.map(sh => `
+    <section class="shelf" id="raf-${sh.id}" aria-labelledby="sh-${sh.id}">
+      <div class="shelf-h"><h2 class="plaque" id="sh-${sh.id}">${sh.title}</h2><span class="lvl">${sh.sub}</span></div>
+      <div class="rw"><div class="row">${sh.books.map(b => bookCard(b)).join('')}</div></div>
+    </section>`).join('');
+  wall.querySelectorAll('.bk.ready').forEach(el => el.onclick = () => { store.set('or.grade', el.closest('.shelf').id); chooseStart(el.dataset.id); });
+  const tabs = $('#tabs');
+  tabs.innerHTML = LIB.shelves.map(sh => `<button class="tab" data-to="raf-${sh.id}">${sh.title}</button>`).join('');
+  const mark = id => tabs.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-current', t.dataset.to === id));
+  tabs.querySelectorAll('.tab').forEach(t => t.onclick = () => { store.set('or.grade', t.dataset.to); mark(t.dataset.to); document.getElementById(t.dataset.to).scrollIntoView({behavior:'smooth', block:'start'}); });
+  if(window.IntersectionObserver){
+    const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) mark(e.target.id); }), {rootMargin:'-45% 0px -50% 0px'});
+    wall.querySelectorAll('.shelf').forEach(s => io.observe(s));
+  }
+  const g = store.get('or.grade', null);
+  if(g && document.getElementById(g)){ mark(g); requestAnimationFrame(() => document.getElementById(g).scrollIntoView({block:'start'})); }
+  else mark('raf-' + LIB.shelves[0].id);
+}
+function bookCard(b){
+  const last = store.get('or.page.' + b.id, 0), words = store.get('or.bag.' + b.id, []).length;
+  const pct = b.ready ? Math.round(Math.min(last, b.pages) / b.pages * 100) : 0;
+  const status = !last ? 'Başla' : pct >= 100 ? '<span class="done"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg> Bitti</span>' : 's. ' + last;
+  return `<button class="bk ${b.ready ? 'ready' : 'soon'}" data-id="${b.id}" ${b.ready ? '' : 'aria-disabled="true" tabindex="-1"'}>
+    <div class="cover">${b.ready ? '' : '<span class="ribbon">Yakında</span>'}${b.cover === false ? `<div class="ph"><span>${b.title}</span></div>` : `<img src="books/${b.id}/cover.jpg" alt="${b.title} kapağı" loading="lazy">`}</div>
+    <div class="cap"><div class="bt"><span>${b.no}</span>${b.title}</div>
+    ${b.ready ? `<div class="meta"><div class="bar"><i style="width:${pct}%"></i></div>${status}${words ? `<span class="star" title="Kelime Defterim"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,208H48V48H80Zm96-56H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z"/></svg> ${words}</span>` : ''}</div>` : `<div class="meta">Hazırlanıyor</div>`}</div>
+  </button>`;
+}
+
+function chooseStart(id){
+  const b = LIB.shelves.flatMap(s => s.books).find(x => x.id === id), last = store.get('or.page.' + id, 0);
+  if(!last || last <= 1){ store.set('or.page.' + id, 1); location.hash = id; return; }
+  $('#qz').className = 'qz';
+  $('#qz').innerHTML = `
+    <div class="qz-h"><img class="cover-sm" src="books/${id}/cover.jpg" alt=""><div class="qz-who"><b>${b.title}</b><small>Kaldığın yer: s. ${last}</small></div></div>
+    <div class="choose">
+      <button class="qz-btn main" data-go="cont">Kaldığın yerden devam et <span>s. ${last} <svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></span></button>
+      <button class="qz-btn alt" data-go="start">Baştan başla <span><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,47.88V208.12a16,16,0,0,1-24.43,13.43L64,146.77V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0v69.23L183.57,34.45A15.95,15.95,0,0,1,208,47.88Z"/></svg></span></button>
+    </div>`;
+  $('#qzScrim').hidden = false;
+  $('#qz').querySelector('[data-go="cont"]').onclick = () => { $('#qzScrim').hidden = true; location.hash = id; };
+  $('#qz').querySelector('[data-go="start"]').onclick = () => { $('#qzScrim').hidden = true; store.set('or.page.' + id, 1); location.hash = id; };
+}
+$('#qzScrim').addEventListener('click', e => { if(e.target === $('#qzScrim') && !QS){ $('#qzScrim').hidden = true; } });
+
+/* ---------- usage counter (Abacus, no account, no personal data): every visit counts ---------- */
+const CNT = 'https://abacus.jasoncameron.dev', NS = 'akilli-kitaplik-gk';
+function hit(key){ return fetch(`${CNT}/hit/${NS}/${key}`).then(r => r.ok ? r.json() : null).then(j => j ? j.value : null).catch(() => null); }
+async function showCount(){
+  const v = await hit('acilis');
+  if(v === null) return;
+  $('#cnt b').textContent = Number(v).toLocaleString('tr-TR'); $('#cnt').hidden = false;
+}
+
+/* ---------- routing ---------- */
+async function route(){
+  closePop(); closeBag();
+  await loadLib();
+  const id = location.hash.replace('#', '');
+  const meta = LIB.shelves.flatMap(s => s.books).find(b => b.id === id && b.ready);
+  if(meta){ await openBook(meta); hit('kitap-' + meta.id); }
+  else { if(typeof stopPlay === 'function') stopPlay(); $('#reader').hidden = true; $('#lib').hidden = false; renderLib(); document.title = 'Akıllı Kitaplık'; }
+}
+window.addEventListener('hashchange', route);
+$('#backBtn').onclick = () => { location.hash = ''; };
+
+/* ---------- reader ---------- */
+async function openBook(meta){
+  if(!BOOK || BOOK.id !== meta.id){
+    BOOK = await (await fetch(`books/${meta.id}/book.json`)).json();
+  }
+  $('#lib').hidden = true; $('#reader').hidden = false;
+  $('#rTitle').textContent = BOOK.title; document.title = BOOK.title + ' · Akıllı Kitaplık';
+  bag = store.get('or.bag.' + BOOK.id, []);
+  cur = Math.max(1, store.get('or.page.' + BOOK.id, 1));
+  quizDone = new Set(); sessionStars = new Set(); $('#backQ').hidden = true;
+  stopPlay(); drawnKey = ''; renderBag(); syncLangs(); syncHints(); syncQuiz(); layout(); loadSes();
+  syncTeach(false);
+  subSid = null; syncTr();
+  const tip = $('#tip'); if(!T) tip.classList.remove('gone'); setTimeout(() => tip.classList.add('gone'), 5000);
+}
+function asp(){ return BOOK.aspect ? BOOK.aspect[0] / BOOK.aspect[1] : 680.31 / 623.62; }
+function spreadOf(n){
+  if(!two) return [n];
+  const N = BOOK.pages.length;
+  if(n === 1) return [1];
+  if(n === N && N % 2 === 0) return [N];
+  const l = n % 2 === 0 ? n : n - 1;
+  return [l, l + 1].filter(x => x <= N);
+}
+function layout(){
+  if($('#reader').hidden) return;
+  two = window.innerWidth >= 760 && window.innerWidth > window.innerHeight * (BOOK && BOOK.aspect && asp() < 1 ? 1.2 * asp() * 2 * 0.62 : 1.05);
+  draw();
+}
+function draw(){
+  closePop(); pageChanged();
+  const pages = spreadOf(cur), bookEl = $('#book'), stage = $('#stage');
+  bookEl.innerHTML = ''; bookEl.classList.toggle('two', pages.length === 2);
+  pages.forEach(n => bookEl.appendChild(pageEl(BOOK.pages[n - 1])));
+  // size: fit spread inside stage
+  const ratio = asp() * pages.length;
+  const sw = stage.clientWidth, sh = stage.clientHeight;
+  let h = Math.min(sh, sw / ratio);
+  bookEl.style.height = h + 'px';
+  const N = BOOK.pages.length;
+  $('#pno').textContent = pages.length === 2 ? `${pages[0]}–${pages[1]} / ${N}` : `${pages[0]} / ${N}`;
+  $('#prev').disabled = pages[0] <= 1;
+  const endQ = pages[pages.length - 1] >= N ? pendingFor(pages) : [];
+  $('#next').disabled = pages[pages.length - 1] >= N && !endQ.length;
+  $('#next').innerHTML = pages[pages.length - 1] >= N && endQ.length ? '<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>' : '<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"/></svg>';
+  if(!T) store.set('or.page.' + BOOK.id, pages[pages.length - 1]);
+  setupInk();
+  // preload neighbours
+  [pages[0] - 2, pages[0] - 1, pages[pages.length - 1] + 1, pages[pages.length - 1] + 2].forEach(n => {
+    if(n >= 1 && n <= N){ const im = new Image(); im.src = `books/${BOOK.id}/${BOOK.pages[n - 1].img}`; }
+  });
+}
+function pageEl(p){
+  const pg = document.createElement('div'); pg.className = 'page';
+  if(BOOK.aspect) pg.style.aspectRatio = BOOK.aspect[0] + '/' + BOOK.aspect[1];
+  pg.innerHTML = `<img src="books/${BOOK.id}/${p.img}" alt="Sayfa ${p.no}">`;
+  p.words.forEach(w => {
+    const b = document.createElement('button');
+    b.className = 'hit' + (w.banner ? ' banner' : '');
+    b.style.cssText = `left:${w.b[0]}%;top:${w.b[1]}%;width:${w.b[2]}%;height:${w.b[3]}%`;
+    b.setAttribute('aria-label', w.t);
+    b.dataset.k = w.k; b.dataset.s = w.s;
+    b.addEventListener('click', ev => { ev.stopPropagation(); if(T && tool === 'veil'){ toggleVeil(b); return; } if(b.classList.contains('veiled')){ unveil(b); return; } openWord(b); });
+    pg.appendChild(b);
+  });
+  return pg;
+}
+function go(d, auto){
+  stopPlay(true);
+  if(!$('#qzScrim').hidden) return;
+  const pages = spreadOf(cur), N = BOOK.pages.length;
+  const n = d > 0 ? pages[pages.length - 1] + 1 : pages[0] - 1;
+  if(d > 0){
+    const q = pendingFor(pages);
+    if(q.length){ startQuiz(q, () => { if(n <= N){ cur = n; draw(); } else finishCard(); }); return; }
+  }
+  if(n < 1 || n > N) return;
+  turnFx(d); cur = n; draw();
+}
+const SFX = new Audio('sesler/sayfa.mp3'); SFX.volume = .6; let sfxOn = store.get('or.sfx', true);
+function syncSfx(){ $('#sfxBtn').innerHTML = sfxOn ? ICO.sOn : ICO.sOff; $('#sfxBtn').setAttribute('aria-pressed', sfxOn); }
+function turnFx(d){
+  if(sfxOn){ try{ SFX.currentTime = 0; SFX.play().catch(() => {}); }catch(e){} }
+  const bk = $('#book'), st = $('#stage'); if(!bk.children.length) return;
+  const rb = bk.getBoundingClientRect(), rs = st.getBoundingClientRect(), dbl = bk.classList.contains('two');
+  const half = dbl ? rb.width / 2 : rb.width, x0 = rb.left - rs.left + (dbl && d > 0 ? half : 0);
+  const w = document.createElement('div'); w.className = 'foldwrap ' + (d > 0 ? 'fwd' : 'back');
+  if(!dbl && d < 0) w.style.transformOrigin = 'right center';
+  w.style.cssText += `;left:${x0}px;top:${rb.top - rs.top}px;width:${half}px;height:${rb.height}px`;
+  const c = bk.cloneNode(true); c.removeAttribute('id'); c.querySelectorAll('canvas,.hit').forEach(x => x.remove());
+  c.style.setProperty('width', rb.width + 'px', 'important'); c.style.setProperty('max-width', 'none', 'important'); c.style.left = (dbl && d > 0 ? -half : 0) + 'px';
+  w.appendChild(c); st.appendChild(w); setTimeout(() => w.remove(), 470);
+}
+$('#pno').onclick = e => {
+  e.stopPropagation(); closePop();
+  const pages = spreadOf(cur), N = BOOK.pages.length;
+  $('#qz').className = 'qz wide';
+  $('#qz').innerHTML = `
+    <div class="qz-h"><div class="qz-who"><b>Sayfa seç</b><small>${BOOK.title}</small></div><button class="round" data-x aria-label="Kapat"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></button></div>
+    <div class="pgrid">${BOOK.pages.map(p => `<button class="pg ${pages.includes(p.no) ? 'on' : ''}" data-n="${p.no}"><img src="books/${BOOK.id}/t-${String(p.no).padStart(2,'0')}.jpg" alt="" loading="lazy">${p.no === 1 ? 'Kapak' : p.no}</button>`).join('')}</div>`;
+  $('#qzScrim').hidden = false;
+  $('#qz').querySelector('[data-x]').onclick = () => { $('#qzScrim').hidden = true; };
+  $('#qz').querySelectorAll('.pg').forEach(b => b.onclick = () => { $('#qzScrim').hidden = true; cur = +b.dataset.n; draw(); });
+};
+$('#trBtn').onclick = e => { e.stopPropagation(); trMode = trMode === 'off' ? 'card' : trMode === 'card' ? 'bar' : 'off'; store.set('or.trmode', trMode); subSid = null; syncTr(); };
+$('#prev').onclick = () => go(-1);
+$('#next').onclick = () => go(1);
+document.addEventListener('keydown', e => {
+  if($('#reader').hidden) return;
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+  if(e.key === 'Escape'){ closePop(); closeBag(); }
+});
+let tx = null;
+$('#stage').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+$('#stage').addEventListener('touchend', e => {
+  if(tx === null) return; const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if(T && (tool === 'pen' || tool === 'hl')) return;
+  if(Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
+});
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
+
+/* ---------- speech (optional) ---------- */
+let trVoice = null;
+function pickVoice(){ if(!('speechSynthesis' in window)) return; trVoice = speechSynthesis.getVoices().find(x => /^tr(-|_|$)/i.test(x.lang)) || null; }
+pickVoice();
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => { pickVoice(); if(active) render(active); };
+function say(text){ if(!trVoice) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.voice = trVoice; u.lang = trVoice.lang; u.rate = .82; speechSynthesis.speak(u); }
+
+/* ---------- word card ---------- */
+const pop = $('#pop');
+function trList(o){ return `<ul class="tr">${(T ? ['en','ky','ru'] : langs).map(l => `<li><span class="lb">${LBL[l]}</span><span class="tx">${o[l]}</span></li>`).join('')}</ul>`; }
+const inBag = k => bag.includes(k);
+function render(btn){
+  const g = BOOK.gloss[btn.dataset.k], s = BOOK.sent[btn.dataset.s];
+  const hasA = SES && hasSes(btn.dataset.s);
+  const spk = (trVoice || hasA) ? `<button class="round say" data-say="w" aria-label="Dinle"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M160,32.25V223.69a8.29,8.29,0,0,1-3.91,7.18,8,8,0,0,1-9-.56l-65.57-51A4,4,0,0,1,80,176.16V79.84a4,4,0,0,1,1.55-3.15l65.57-51a8,8,0,0,1,10,.16A8.27,8.27,0,0,1,160,32.25ZM60,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H60a4,4,0,0,0,4-4V84A4,4,0,0,0,60,80Zm126.77,20.84a8,8,0,0,0-.72,11.3,24,24,0,0,1,0,31.72,8,8,0,1,0,12,10.58,40,40,0,0,0,0-52.88A8,8,0,0,0,186.74,100.84Zm40.89-26.17a8,8,0,1,0-11.92,10.66,64,64,0,0,1,0,85.34,8,8,0,1,0,11.92,10.66,80,80,0,0,0,0-106.66Z"/></svg></button>` : '';
+  pop.innerHTML = `
+    <div class="pop-h"><h2 class="pop-w">${g.w}</h2>${spk}<button class="round" data-x aria-label="Kapat"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></button></div>
+    <p class="note">${g.tr}</p>
+    ${g.cog ? `<span class="cog"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z"/></svg> Kırgızcada da var: ${g.cog}</span>` : ''}
+    <div class="wrow">${trList(g)}${g.img ? `<img class="wpic" src="books/${BOOK.id}/${g.img}" alt="${g.w}">` : ''}</div>
+    <div class="acts">
+      ${hasA ? `<button class="act" data-from>${ICO.head} Buradan dinle</button>` : ''}<button class="act" data-sent aria-pressed="${showSent}">Cümleyi çevir</button>
+      ${T ? '' : `<button class="act ${inBag(btn.dataset.k) ? 'done' : ''}" data-bag>${inBag(btn.dataset.k) ? '<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg> Defterde' : '<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,208H48V48H80Zm96-56H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z"/></svg> Deftere ekle'}</button>`}
+    </div>
+    ${showSent ? `<div class="sentbox"><div class="tq"><span>${s.tr}</span>${(trVoice || hasA) ? '<button class="round say" data-say="s" aria-label="Cümleyi dinle"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M160,32.25V223.69a8.29,8.29,0,0,1-3.91,7.18,8,8,0,0,1-9-.56l-65.57-51A4,4,0,0,1,80,176.16V79.84a4,4,0,0,1,1.55-3.15l65.57-51a8,8,0,0,1,10,.16A8.27,8.27,0,0,1,160,32.25ZM60,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H60a4,4,0,0,0,4-4V84A4,4,0,0,0,60,80Zm126.77,20.84a8,8,0,0,0-.72,11.3,24,24,0,0,1,0,31.72,8,8,0,1,0,12,10.58,40,40,0,0,0,0-52.88A8,8,0,0,0,186.74,100.84Zm40.89-26.17a8,8,0,1,0-11.92,10.66,64,64,0,0,1,0,85.34,8,8,0,1,0,11.92,10.66,80,80,0,0,0,0-106.66Z"/></svg></button>' : ''}</div>${trList(s)}</div>` : ''}`;
+  pop.querySelector('[data-x]').onclick = closePop;
+  pop.querySelectorAll('[data-say]').forEach(b => b.onclick = () => { if(!sayFromBook(btn, b.dataset.say)) say(b.dataset.say === 'w' ? g.w : s.tr.replace(/^[^:]+:\s*/, '')); });
+  const fb_ = pop.querySelector('[data-from]'); if(fb_) fb_.onclick = e => { e.stopPropagation(); playFrom(btn.dataset.s); };
+  pop.querySelector('[data-sent]').onclick = () => { showSent = !showSent; render(btn); place(btn); };
+  if(!T) pop.querySelector('[data-bag]').onclick = () => {
+    const k = btn.dataset.k; bag = inBag(k) ? bag.filter(x => x !== k) : [...bag, k];
+    store.set('or.bag.' + BOOK.id, bag); renderBag(); render(btn);
+  };
+}
+function place(btn){
+  const r = btn.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, vw = innerWidth, vh = innerHeight, m = 12;
+  let left = Math.min(Math.max(m, r.left + r.width / 2 - pw / 2), vw - pw - m);
+  let top = r.bottom + 10;
+  if(top + ph > vh - m) top = r.top - ph - 10;
+  if(top < m) top = Math.max(m, vh - ph - m);
+  pop.style.left = left + 'px'; pop.style.top = top + 'px';
+}
+function openWord(btn){
+  $('#tip').classList.add('gone');
+  document.querySelectorAll('.hit.on,.hit.sent').forEach(h => h.classList.remove('on', 'sent'));
+  btn.parentElement.querySelectorAll(`.hit[data-s="${btn.dataset.s}"]`).forEach(h => h.classList.add(h.dataset.k === btn.dataset.k ? 'on' : 'sent'));
+  active = btn; showSent = trMode === 'card'; pop.hidden = false; render(btn); place(btn); showSub(btn.dataset.s);
+}
+function closePop(){ pop.hidden = true; active = null; document.querySelectorAll('.hit.on,.hit.sent').forEach(h => h.classList.remove('on', 'sent')); }
+pop.addEventListener('click', e => e.stopPropagation());
+$('#drawer').addEventListener('click', e => e.stopPropagation());
+document.addEventListener('click', () => { if(active) closePop(); });
+
+/* ---------- languages & hints ---------- */
+function syncLangs(){ document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', langs.includes(c.dataset.lang))); }
+document.querySelectorAll('.chip').forEach(c => c.onclick = e => {
+  e.stopPropagation(); const l = c.dataset.lang;
+  if(langs.includes(l)){ if(langs.length === 1) return; langs = langs.filter(x => x !== l); }
+  else langs = ['en','ky','ru'].filter(x => x === l || langs.includes(x));
+  store.set('or.langs', langs); syncLangs(); if(active){ render(active); place(active); }
+});
+function syncHints(){ $('#book').classList.toggle('hints', hints); $('#hintBtn').setAttribute('aria-pressed', hints); }
+$('#hintBtn').onclick = () => { hints = !hints; store.set('or.hints', hints); syncHints(); };
+
+/* ---------- bag ---------- */
+function renderBag(){
+  $('#bagCount').textContent = bag.length;
+  const ul = $('#bagList');
+  const clr = $('#bagClear'); clr.hidden = !bag.length; clr.classList.remove('sure'); clr.textContent = 'Temizle';
+  if(!bag.length){ ul.innerHTML = `<li class="empty">Defterin boş. Bir kelimeye dokun ve “Deftere ekle”ye bas.</li>`; return; }
+  ul.innerHTML = bag.map(k => { const g = BOOK.gloss[k]; if(!g) return ''; return `<li class="${g.img ? 'pic' : ''}">${g.img ? `<img src="books/${BOOK.id}/${g.img}" alt="">` : ''}<b>${g.w}</b><small>${langs.map(l => g[l]).join(' · ')}</small><button data-rm="${k}">Çıkar</button></li>`; }).join('');
+  ul.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { bag = bag.filter(x => x !== b.dataset.rm); store.set('or.bag.' + BOOK.id, bag); renderBag(); });
+}
+function openBag(){ closePop(); renderBag(); $('#drawer').hidden = false; $('#scrim').hidden = false; }
+function closeBag(){ $('#drawer').hidden = true; $('#scrim').hidden = true; }
+$('#bagBtn').onclick = e => { e.stopPropagation(); openBag(); };
+$('#bagClose').onclick = closeBag; $('#scrim').onclick = closeBag;
+$('#bagClear').onclick = () => {
+  const c = $('#bagClear');
+  if(!c.classList.contains('sure')){ c.classList.add('sure'); c.textContent = 'Emin misin? Evet, hepsini sil'; return; }
+  bag = []; store.set('or.bag.' + BOOK.id, bag); renderBag(); if(active) render(active);
+};
+
+/* ---------- fullscreen (optional) ---------- */
+$('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } }catch(e){} };
+if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
+
+/* ---------- narration: page player + karaoke + speed ---------- */
+// ses.json: sayfa biçimi  "_p": {no: {f, d, y: {A|B: {f, s: {sid: [o, k]}}}}},  sid: {p, a, b, w}
+//           eski biçim    sid: {f, d, w}  (cümle kaydı)
+// hız: 0 = normal, 1 = Yavaş (A: cümle arası es)
+const SPD = [{t: '1×', m: null, r: 1}, {t: 'Yavaş', m: 'A', r: 0.92}];   // 24 Ekim: Çok yavaş kaldırıldı
+let SES = null, playing = false, autoplay = false, spd = Math.min(SPD.length - 1, Math.max(0, +store.get('or.spd', 0) || 0)), queue = [], qi = 0, raf = 0, item = null, clipEnd = null, afterClip = null, hitCache = {};
+const AU = new Audio(); AU.preload = 'auto'; AU.preservesPitch = true; AU.mozPreservesPitch = true; AU.webkitPreservesPitch = true;
+async function loadSes(){
+  SES = null;
+  try{ const r = await fetch(`books/${BOOK.id}/ses.json?t=${Date.now()}`, {cache: 'no-store'}); if(r.ok) SES = await r.json(); }catch(e){}
+  syncPlayUI(); showPlayTip();
+}
+const hasSes = sid => !!(SES && SES[sid] && sid[0] !== '_');
+function showPlayTip(){
+  const n = store.get('or.playtip', 0); if(!SES || n >= 3) return; store.set('or.playtip', n + 1);
+  setTimeout(() => {
+    const b = $('#playBtn'); if(b.hidden || $('#reader').hidden) return;
+    const r = b.getBoundingClientRect(), t = document.createElement('div'); t.className = 'playtip'; t.textContent = 'Kitabı sesli dinlemek için bas!';
+    document.body.appendChild(t); t.style.left = Math.max(8, r.left + r.width / 2 - t.offsetWidth / 2) + 'px'; t.style.top = (r.top - t.offsetHeight - 12) + 'px';
+    const off = () => t.remove(); setTimeout(off, 6000); b.addEventListener('click', off, {once:true});
+  }, 900);
+}
+function syncPlayUI(){
+  const has = !!SES;
+  $('#playBtn').hidden = !has; $('#rateBtn').hidden = !has;
+  $('#playBtn').innerHTML = playing ? ICO.pause + '<span>Durdur</span>' : ICO.play + '<span>Sesli dinle</span>';
+  $('#playBtn').setAttribute('aria-label', playing ? 'Durdur' : 'Sesli dinle');
+  $('#playBtn').classList.toggle('on', playing);
+  $('#rateBtn').textContent = SPD[spd].t;
+  $('#rateBtn').setAttribute('aria-pressed', spd > 0);
+}
+function clearKara(){ document.querySelectorAll('.hit.kara,.hit.splay').forEach(h => h.classList.remove('kara', 'splay')); }
+function hitsOf(sid){ return [...document.querySelectorAll('#book .hit')].filter(h => h.dataset.s === sid); }
+function pageSids(){ const out = []; document.querySelectorAll('#book .hit').forEach(h => { const s = h.dataset.s; if(hasSes(s) && !out.includes(s)) out.push(s); }); return out; }
+// page file for the current speed + time map (logical sentence time -> file time)
+function pageSrc(no){
+  const P = SES._p[no], Y = SPD[spd].m && P.y && P.y[SPD[spd].m];
+  return Y ? {src: Y.f, M: Y.s, page: no} : {src: P.f, M: null, page: no};
+}
+function fT(it, s, t){ if(!it.M || !it.M[s]) return t; const [o, k] = it.M[s]; return o + (t - SES[s].a) * k; }
+function lT(it, s, tf){ if(!it.M || !it.M[s]) return tf; const [o, k] = it.M[s]; return SES[s].a + (tf - o) / k; }
+const pageRate = it => it.page !== undefined ? (it.M ? 1 : (SPD[spd].m && !(SES._p[it.page].y) ? SPD[spd].r : 1)) : SPD[spd].r;
+function sentItem(sid, from, to){
+  const e = SES[sid];
+  return e.p !== undefined ? {...pageSrc(e.p), from: from ?? e.a, to: to ?? e.b, sids: [sid]} : {src: e.f, M: null, from: from || 0, to: to ?? null, sids: [sid]};
+}
+function buildQueue(){
+  const q = [];
+  pageSids().forEach(s => {
+    const e = SES[s];
+    if(e.p !== undefined){ const last = q[q.length - 1]; if(last && last.page === e.p) last.sids.push(s); else q.push({...pageSrc(e.p), from: null, to: null, sids: [s]}); }
+    else q.push({src: e.f, M: null, from: 0, to: null, sids: [s], gap: true});
+  });
+  return q;
+}
+function karaLoop(){
+  cancelAnimationFrame(raf);
+  const loop = () => {
+    if(!item) return;
+    const tf = AU.currentTime;
+    if(clipEnd !== null && tf >= clipEnd){ AU.pause(); clipEnd = null; endClip(); return; }
+    item.sids.forEach(s => {
+      const e = SES[s], hs = hitCache[s] || (hitCache[s] = hitsOf(s)), w = e.w || [];
+      const t = lT(item, s, tf);
+      const inS = e.p !== undefined ? (t >= e.a && t < e.b) : true;
+      if(inS) showSub(s);
+      hs.forEach((h, i) => { h.classList.toggle('splay', inS); const x = w[i]; h.classList.toggle('kara', inS && !!x && t >= x[0] - 0.03 && t < x[1] + 0.06); });
+    });
+    if(!AU.paused && !AU.ended) raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+}
+AU.addEventListener('playing', karaLoop);
+AU.addEventListener('ended', () => endClip());
+function endClip(){ cancelAnimationFrame(raf); const cb = afterClip; afterClip = null; clearKara(); cb && cb(); }
+function playItem(it, then, atFile){
+  clearKara(); item = it; hitCache = {};
+  const s0 = it.sids[0];
+  clipEnd = it.to == null ? null : fT(it, s0, it.to);
+  afterClip = then || (() => { item = null; });
+  const startF = atFile ?? (it.from == null ? 0 : fT(it, s0, it.from));
+  const src = `books/${BOOK.id}/ses/${it.src}`;
+  const start = () => { try{ AU.currentTime = startF; }catch(err){} AU.playbackRate = pageRate(it); AU.play().catch(() => stopPlay()); };
+  if(!AU.src.endsWith(src)){ AU.src = src; AU.addEventListener('loadedmetadata', start, {once:true}); AU.load(); }
+  else start();
+}
+function playFrom(sid){
+  stopPlay(true); autoplay = true; closePop(); queue = buildQueue();
+  const idx = queue.findIndex(it => it.sids.includes(sid)); if(idx < 0) return playPage();
+  const it = queue[idx]; it.sids = it.sids.slice(it.sids.indexOf(sid)); if(it.page !== undefined) it.from = SES[sid].a;
+  queue = queue.slice(idx); qi = 0; playing = true; syncPlayUI(); nextInQueue();
+}
+function playPage(){
+  autoplay = true; closePop(); queue = buildQueue(); qi = 0;
+  if(!queue.length){ return endOfPage(); }
+  playing = true; syncPlayUI(); nextInQueue();
+}
+function nextInQueue(){
+  if(!playing) return;
+  if(qi >= queue.length) return endOfPage();
+  const it = queue[qi++];
+  playItem(it, () => setTimeout(nextInQueue, it.gap ? 300 : 150));
+}
+function endOfPage(){
+  clearKara(); item = null;
+  const pages = spreadOf(cur), N = BOOK.pages.length;
+  if(pages[pages.length - 1] >= N && !pendingFor(pages).length){ stopPlay(); return; }
+  // dinleme modu açık kalır: sayfa çevrilince yeni sayfa kendiliğinden okunur
+  playing = false; syncPlayUI();
+}
+let drawnKey = '';
+function pageChanged(){
+  const k = BOOK ? BOOK.id + ':' + cur : '';
+  if(k === drawnKey) return; drawnKey = k;
+  if(!SES) return;
+  stopPlay(true);
+  if(autoplay) setTimeout(() => { if(autoplay && !playing && $('#qzScrim').hidden && !$('#reader').hidden) playPage(); }, 450);
+}
+function stopPlay(keep){
+  playing = false; if(!keep) autoplay = false; afterClip = null; clipEnd = null;
+  try{ AU.pause(); }catch(e){} cancelAnimationFrame(raf); clearKara(); item = null; syncPlayUI();
+}
+function resumeOrPause(){
+  if(playing){ AU.pause(); playing = false; autoplay = false; cancelAnimationFrame(raf); syncPlayUI(); return; }
+  if(item && queue.length && AU.src && !AU.ended && AU.currentTime > 0){
+    playing = true; autoplay = true; syncPlayUI();
+    const it = item; afterClip = () => setTimeout(nextInQueue, it.gap ? 300 : 150);
+    AU.playbackRate = pageRate(it); AU.play(); return;
+  }
+  playPage();
+}
+$('#playBtn').onclick = e => { e.stopPropagation(); resumeOrPause(); };
+$('#sfxBtn').onclick = e => { e.stopPropagation(); sfxOn = !sfxOn; store.set('or.sfx', sfxOn); syncSfx(); };
+syncSfx();
+$('#rateBtn').onclick = e => {
+  e.stopPropagation(); spd = (spd + 1) % SPD.length; store.set('or.spd', spd); syncPlayUI();
+  if(!item) return;
+  if(item.page === undefined){ AU.playbackRate = SPD[spd].r; return; }
+  // same spot in the other speed's file
+  const tf = AU.currentTime, was = !AU.paused, cb = afterClip;
+  let s = item.sids[0];
+  for(const x of item.sids){ if(fT(item, x, SES[x].a) <= tf + 1e-3) s = x; }
+  const t = lT(item, s, tf), toL = clipEnd === null ? null : item.to;
+  const nu = {...item, ...pageSrc(item.page)};
+  const F = fT(nu, s, t);
+  nu.from = null; nu.to = toL;
+  playItem(nu, cb, F);
+  if(!was) AU.addEventListener('playing', () => AU.pause(), {once:true});
+};
+function sayFromBook(btn, which){
+  const sid = btn.dataset.s;
+  if(!hasSes(sid)) return false;
+  stopPlay(); queue = [];
+  const e = SES[sid];
+  if(which === 's'){ playItem(sentItem(sid)); return true; }
+  const i = hitsOf(sid).indexOf(btn), w = e.w && e.w[i];
+  if(!w){ playItem(sentItem(sid)); return true; }
+  const ws = e.w, prev = ws.slice(0, i).reverse().find(Boolean), nx = ws.slice(i + 1).find(Boolean);
+  const lo = e.p !== undefined ? e.a : 0, hi = e.p !== undefined ? e.b : e.d;
+  const a = Math.max(prev ? prev[1] : lo, w[0] - 0.08), b = nx ? Math.min(nx[0], w[1] + 0.3) : Math.min(hi, w[1] + 0.35);
+  playItem(sentItem(sid, a, Math.max(b, w[1] + 0.05)));
+  return true;
+}
+
+/* ---------- question audio ---------- */
+const QA = new Audio(); QA.preload = 'auto'; QA.preservesPitch = true; QA.webkitPreservesPitch = true;
+let qaRaf = 0;
+function stopQA(){ try{ QA.pause(); }catch(e){} cancelAnimationFrame(qaRaf); document.querySelectorAll('#qz .kara').forEach(x => x.classList.remove('kara')); }
+function playQ(q){
+  const E = SES && SES._q && SES._q[q.id]; if(!E) return false;
+  stopPlay(true); stopQA();
+  const slow = false, k = 1;   // sorular her kademede doğal sesle   // Yavaş: soru doğal sesiyle; Çok yavaş: hafif yavaş dosya
+  QA.src = `books/${BOOK.id}/ses/${slow ? E.fy : E.f}`; QA.playbackRate = 1;
+  QA.play().catch(() => {});
+  const loop = () => {
+    const t = QA.currentTime / k, qz = $('#qz');
+    qz.querySelectorAll('.qw').forEach(el => { const x = E.w[+el.dataset.w]; el.classList.toggle('kara', !!x && t >= x[0] - 0.03 && t < x[1] + 0.06); });
+    qz.querySelectorAll('.opt[data-i]').forEach(el => { const x = (E.o || [])[+el.dataset.i]; el.classList.toggle('kara', !!x && t >= x[0] - 0.05 && t < x[1] + 0.25); });
+    if(!QA.paused && !QA.ended) qaRaf = requestAnimationFrame(loop); else qz.querySelectorAll('.kara').forEach(x => x.classList.remove('kara'));
+  };
+  QA.addEventListener('playing', () => { cancelAnimationFrame(qaRaf); qaRaf = requestAnimationFrame(loop); }, {once: true});
+  return true;
+}
+function playFb(key){
+  if(!SES || !SES._fb) return;
+  stopQA(); QA.src = `sesler/${SES._fb}/${key}.mp3`; QA.playbackRate = 1; QA.play().catch(() => {});
+}
+
+/* ---------- teacher mode (board view) ---------- */
+function syncTeach(redraw){
+  document.body.classList.toggle('teach', T);
+  $('#teachBtn').setAttribute('aria-pressed', T);
+  if(!T) tool = 'tap';
+  setTool(tool);
+  if(redraw && BOOK && !$('#reader').hidden) layout();
+}
+function setTool(t){
+  tool = t;
+  document.querySelectorAll('.tt[data-tool]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tool === t));
+  $('#book').classList.toggle('drawing', T && (t === 'pen' || t === 'hl'));
+  $('#book').classList.toggle('veiling', T && t === 'veil');
+  closePop();
+}
+$('#teachBtn').onclick = e => {
+  e.stopPropagation(); T = !T; store.set('or.teach', T); if(T) hit('ogretmen');
+  try{
+    const de = document.documentElement;
+    if(T && !document.fullscreenElement && !document.webkitFullscreenElement){ const p = (de.requestFullscreen || de.webkitRequestFullscreen)?.call(de); if(p && p.catch) p.catch(() => {}); }
+    if(!T && (document.fullscreenElement || document.webkitFullscreenElement)){ (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); }
+  }catch(err){}
+  syncTeach(true);
+};
+document.querySelectorAll('.tt[data-tool]').forEach(b => b.onclick = e => { e.stopPropagation(); setTool(b.dataset.tool); });
+$('#wipeBtn').onclick = e => { e.stopPropagation(); strokes = []; paint(); document.querySelectorAll('.hit.veiled').forEach(h => h.classList.remove('veiled')); };
+function toggleVeil(b){ b.classList.toggle('veiled'); }
+function unveil(b){ b.classList.remove('veiled'); }
+
+/* ink: pen + highlighter over the spread, cleared on page turn */
+let strokes = [], inkC = null;
+function setupInk(){
+  strokes = [];
+  const book = $('#book');
+  inkC = document.createElement('canvas'); inkC.className = 'ink'; book.appendChild(inkC);
+  const r = book.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  inkC.width = Math.round(r.width * dpr); inkC.height = Math.round(r.height * dpr);
+  let s = null;
+  const pt = ev => { const b = inkC.getBoundingClientRect(); return [(ev.clientX - b.left) / b.width, (ev.clientY - b.top) / b.height]; };
+  inkC.addEventListener('pointerdown', ev => { if(!(T && (tool === 'pen' || tool === 'hl'))) return; ev.preventDefault(); ev.stopPropagation(); inkC.setPointerCapture(ev.pointerId); s = {t:tool, p:[pt(ev)]}; strokes.push(s); paint(); });
+  inkC.addEventListener('pointermove', ev => { if(!s) return; ev.preventDefault(); s.p.push(pt(ev)); paint(); });
+  const end = () => { s = null; };
+  inkC.addEventListener('pointerup', end); inkC.addEventListener('pointercancel', end);
+  inkC.addEventListener('click', ev => ev.stopPropagation());
+}
+function paint(){
+  if(!inkC) return;
+  const c = inkC.getContext('2d'), W = inkC.width, H = inkC.height;
+  c.clearRect(0, 0, W, H); c.lineCap = 'round'; c.lineJoin = 'round';
+  strokes.forEach(s => {
+    c.strokeStyle = s.t === 'pen' ? '#e8590c' : 'rgba(255,212,59,.5)';
+    c.lineWidth = (s.t === 'pen' ? .004 : .028) * W;
+    c.beginPath(); s.p.forEach(([x, y], i) => i ? c.lineTo(x * W, y * H) : c.moveTo(x * W, y * H));
+    if(s.p.length === 1) c.lineTo(s.p[0][0] * W + .5, s.p[0][1] * H);
+    c.stroke();
+  });
+}
+
+/* ---------- Haydi, cevapla! ---------- */
+let quizOn = store.get('or.quiz', true), quizDone = new Set(), QS = null;
+function syncQuiz(){ $('#quizBtn').setAttribute('aria-pressed', quizOn); $('#quizBtn').hidden = !(BOOK && BOOK.quiz && BOOK.quiz.length); }
+$('#quizBtn').onclick = () => { quizOn = !quizOn; store.set('or.quiz', quizOn); syncQuiz(); draw(); };
+function pendingFor(pages){
+  if(!quizOn || !BOOK || !BOOK.quiz) return [];
+  return BOOK.quiz.filter(q => q.after >= pages[0] && q.after <= pages[pages.length - 1] && !quizDone.has(q.id));
+}
+const SCORABLE = t => ['mc','tf','who','order'].includes(t);
+let sessionStars = new Set();
+function giveStar(q){ sessionStars.add(q.id); }
+function startQuiz(list, done){ closePop(); $('#qz').className = 'qz'; QS = {list, i:0, done, st:{}}; showQ(); }
+function shuffle(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function showQ(){
+  const q = QS.list[QS.i], host = BOOK.host || {name:'', face:''};
+  const st = QS.st[q.id] || (QS.st[q.id] = {tries:0, state:'open', pick:null, order:[], tr:false, mix: q.type === 'order' ? shuffle(q.options.map((o, i) => i)) : null});
+  const qz = $('#qz'), trOn = st.tr;
+  const L3 = T ? ['en','ky','ru'] : langs;
+  const trBlock = o => o ? `<ul class="qz-tr">${L3.map(l => `<li><span>${LBL[l]}</span><span>${o[l]}</span></li>`).join('')}</ul>` : '';
+  const optSub = o => trOn && o.tt ? `<small>${L3.map(l => o.tt[l]).join(' · ')}</small>` : '';
+  let body = '';
+  if(['mc','tf','who','predict'].includes(q.type)){
+    const n = q.options.length;
+    const allFaces = q.options.every(o => o.face);  // pictures only when every option has one
+    body = `<div class="qz-opts ${n === 2 ? 'row2' : 'row3'}">${q.options.map((o, i) => {
+      let cls = '';
+      if(st.pick === i) cls = (q.type === 'predict' || (T && st.state === 'open')) ? 'pick' : (i === q.answer ? 'ok' : 'no');
+      if(st.state !== 'open' && q.answer === i && q.type !== 'predict') cls = 'ok';
+      return `<button class="opt ${cls}" data-i="${i}" ${st.state !== 'open' ? 'disabled' : ''}>${T ? `<span class="abc">${'ABCD'[i]}</span>` : ''}${allFaces ? `<img src="books/${BOOK.id}/${o.face}" alt="">` : ''}${o.t}${optSub(o)}</button>`;
+    }).join('')}</div>`;
+  } else if(q.type === 'order'){
+    const placed = st.state === 'revealed' ? q.options.map((o, i) => i) : st.order;
+    body = `<div class="slots">${[0,1,2,3].slice(0, q.options.length).map(k => `<div class="slot ${placed[k] !== undefined ? 'full' : ''}"><i>${k + 1}</i>${placed[k] !== undefined ? q.options[placed[k]].t : ''}</div>`).join('')}</div>
+      <div class="qz-opts row2">${st.mix.map(i => `<button class="opt ${placed.includes(i) ? 'pick' : ''}" data-i="${i}" ${placed.includes(i) || st.state !== 'open' ? 'disabled' : ''}>${q.options[i].t}${optSub(q.options[i])}</button>`).join('')}</div>`;
+  } else if(q.type === 'talk'){
+    body = `<p class="qz-fb">${q.tip || ''}${trOn && q.tipt ? `<small>${langs.map(l => q.tipt[l]).join(' · ')}</small>` : ''}</p>`;
+  }
+  let fb = '', foot = '';
+  const findBtn = q.find ? `<button class="qz-btn alt" data-find><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,56V200a8,8,0,0,1-8,8H160a24,24,0,0,0-24,23.94,7.9,7.9,0,0,1-5.12,7.55A8,8,0,0,1,120,232a24,24,0,0,0-24-24H24a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8H88a32,32,0,0,1,32,32v87.73a8.17,8.17,0,0,0,7.47,8.25,8,8,0,0,0,8.53-8V80a32,32,0,0,1,32-32h64A8,8,0,0,1,240,56Z"/></svg> Kitapta bul</button>` : '';
+  const nextBtn = `<button class="qz-btn main" data-next>Devam <svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>`;
+  if(q.type === 'talk'){ foot = nextBtn; }
+  else if(st.state === 'ok'){ fb = `<p class="qz-fb ok"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M111.49,52.63a15.8,15.8,0,0,0-26,5.77L33,202.78A15.83,15.83,0,0,0,47.76,224a16,16,0,0,0,5.46-1l144.37-52.5a15.8,15.8,0,0,0,5.78-26ZM65.14,161.13l19.2-52.79,63.32,63.32-52.8,19.2ZM160,72a37.8,37.8,0,0,1,3.84-15.58C169.14,45.83,179.14,40,192,40c6.7,0,11-2.29,13.65-7.21A22,22,0,0,0,208,23.94,8,8,0,0,1,224,24c0,12.86-8.52,32-32,32-6.7,0-11,2.29-13.65,7.21A22,22,0,0,0,176,72.06,8,8,0,0,1,160,72ZM136,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm101.66,82.34a8,8,0,1,1-11.32,11.31l-16-16a8,8,0,0,1,11.32-11.32Zm4.87-42.75-24,8a8,8,0,0,1-5.06-15.18l24-8a8,8,0,0,1,5.06,15.18Z"/></svg> Aferin!</p>`; foot = findBtn + nextBtn; }
+  else if(st.state === 'revealed' && T){ fb = `<p class="qz-fb no">Doğru cevap: ${q.type === 'order' ? 'bu sıra' : 'ABCD'[q.answer]}<small>Kitapta birlikte bakalım!</small></p>`; foot = findBtn + nextBtn; }
+  else if(st.state === 'revealed'){ fb = `<p class="qz-fb no">Doğru cevap bu.<small>Kitapta birlikte bakalım!</small></p>`; foot = findBtn + nextBtn; }
+  else if(st.state === 'seen'){ fb = `<p class="qz-fb">Haydi, okuyalım ve görelim!</p>`; foot = nextBtn; }
+  else if(T && q.type !== 'predict'){ const ready = q.type === 'order' ? st.order.length === q.options.length : st.pick !== null; fb = `<p class="qz-fb">${ready ? 'Herkes hazır mı?' : 'Sınıf ne diyor?'}</p>`; foot = `<button class="qz-btn alt" data-redo aria-label="Tekrar dene"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L60.63,81.29l17,17A8,8,0,0,1,72,112H24a8,8,0,0,1-8-8V56A8,8,0,0,1,29.66,50.3L49.31,70,60.25,60A96,96,0,0,1,224,128Z"/></svg></button><button class="qz-btn show" data-show><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,168a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z"/></svg> Cevabı göster</button>`; }
+  else if(st.tries === 1){ fb = `<p class="qz-fb no">Bir daha dene!</p>`; }
+  const QA_ = SES && SES._q && SES._q[q.id];
+  const spk = (trVoice || QA_) ? `<button class="round say" data-say aria-label="Dinle"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M160,32.25V223.69a8.29,8.29,0,0,1-3.91,7.18,8,8,0,0,1-9-.56l-65.57-51A4,4,0,0,1,80,176.16V79.84a4,4,0,0,1,1.55-3.15l65.57-51a8,8,0,0,1,10,.16A8.27,8.27,0,0,1,160,32.25ZM60,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H60a4,4,0,0,0,4-4V84A4,4,0,0,0,60,80Zm126.77,20.84a8,8,0,0,0-.72,11.3,24,24,0,0,1,0,31.72,8,8,0,1,0,12,10.58,40,40,0,0,0,0-52.88A8,8,0,0,0,186.74,100.84Zm40.89-26.17a8,8,0,1,0-11.92,10.66,64,64,0,0,1,0,85.34,8,8,0,1,0,11.92,10.66,80,80,0,0,0,0-106.66Z"/></svg></button>` : '';
+  const qText = QA_ ? q.q.split(' ').map((w, i) => `<span class="qw" data-w="${i}">${w}</span>`).join(' ') : q.q;
+  qz.innerHTML = `
+    <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="${host.name}">` : ''}
+      <div class="qz-who"><b>Haydi, cevapla!</b><small>${host.name ? host.name + ' soruyor' : ''} · ${QS.i + 1}/${QS.list.length}</small></div>
+      ${st.state === 'open' && q.type !== 'talk' ? '<button class="qz-skip" data-skip>Geç <svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>' : ''}</div>
+    <div class="qz-q"><p>${qText}</p><div class="qz-tools">${spk}<button class="round" data-tr aria-pressed="${trOn}" aria-label="Çevir" title="Çevir"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M160,129.89,175.06,160H144.94l6.36-12.7v0ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM207.16,188.42l-40-80a8,8,0,0,0-14.32,0L139.66,134.8a62.31,62.31,0,0,1-23.61-10A79.61,79.61,0,0,0,135.6,80H152a8,8,0,0,0,0-16H112V56a8,8,0,0,0-16,0v8H56a8,8,0,0,0,0,16h63.48a63.73,63.73,0,0,1-15.3,34.05,65.93,65.93,0,0,1-9-13.61,8,8,0,0,0-14.32,7.12,81.75,81.75,0,0,0,11.4,17.15A63.62,63.62,0,0,1,56,136a8,8,0,0,0,0,16,79.56,79.56,0,0,0,48.11-16.13,78.33,78.33,0,0,0,28.18,13.66l-19.45,38.89a8,8,0,0,0,14.32,7.16L136.94,176h46.12l9.78,19.58a8,8,0,1,0,14.32-7.16Z"/></svg></button></div></div>
+    ${trOn ? trBlock(q.qt) : ''}
+    ${body}${fb}
+    ${foot ? `<div class="qz-foot">${foot}</div>` : ''}`;
+  $('#qzScrim').hidden = false;
+  qz.querySelector('[data-tr]').onclick = () => { st.tr = !st.tr; showQ(); };
+  qz.querySelector('[data-say]')?.addEventListener('click', () => { if(!playQ(q)) say(q.q); });
+  // sesli soru: dinleme açıksa kendiliğinden; geri bildirim sesi durum değişince
+  if(QA_ && !st.heard && st.state === 'open' && autoplay){ st.heard = true; setTimeout(() => { if(QS && QS.list[QS.i] === q) playQ(q); }, 350); }
+  const fbKey = st.state === 'ok' ? 'ok' : st.state === 'revealed' ? 'dogru' : st.state === 'seen' ? 'gorelim' : (st.tries === 1 && !T ? 'tekrar' : null);
+  if(fbKey && st.lastFb !== fbKey){ st.lastFb = fbKey; playFb(fbKey === 'ok' ? (Math.random() < .5 ? 'aferin' : 'harika') : fbKey); }
+  qz.querySelector('[data-skip]')?.addEventListener('click', nextQ);
+  qz.querySelector('[data-next]')?.addEventListener('click', nextQ);
+  qz.querySelector('[data-find]')?.addEventListener('click', () => findInBook(q));
+  qz.querySelector('[data-show]')?.addEventListener('click', () => reveal(q, st));
+  qz.querySelector('[data-redo]')?.addEventListener('click', () => { st.pick = null; st.order = []; showQ(); });
+  qz.querySelectorAll('.opt:not(:disabled)').forEach(b => b.onclick = () => answer(q, st, +b.dataset.i));
+}
+function answer(q, st, i){
+  if(T && q.type === 'order'){ if(st.order.length < q.options.length) st.order.push(i); return showQ(); }
+  if(T && q.type !== 'predict'){ st.pick = i; return showQ(); }
+  if(q.type === 'predict'){ st.pick = i; st.state = 'seen'; return showQ(); }
+  if(q.type === 'order'){
+    st.order.push(i);
+    if(st.order.length < q.options.length) return showQ();
+    const right = st.order.every((v, k) => v === k);
+    st.tries++;
+    if(right){ st.state = 'ok'; giveStar(q); }
+    else if(st.tries >= 2){ st.state = 'revealed'; }
+    else { st.order = []; }
+    return showQ();
+  }
+  st.pick = i; st.tries++;
+  if(i === q.answer){ st.state = 'ok'; giveStar(q); }
+  else if(st.tries >= 2){ st.state = 'revealed'; }
+  showQ();
+}
+function reveal(q, st){
+  if(q.type === 'order'){ const right = st.order.length === q.options.length && st.order.every((v, k) => v === k); st.state = right ? 'ok' : 'revealed'; }
+  else { st.state = st.pick === q.answer ? 'ok' : 'revealed'; }
+  if(st.state === 'ok') giveStar(q);
+  showQ();
+}
+function nextQ(){
+  stopQA();
+  quizDone.add(QS.list[QS.i].id);
+  if(QS.i < QS.list.length - 1){ QS.i++; return showQ(); }
+  $('#qzScrim').hidden = true; const d = QS.done; QS = null; d && d();
+}
+let returnTo = null;
+function findInBook(q){
+  $('#qzScrim').hidden = true; returnTo = cur; $('#tip').classList.add('gone');
+  cur = q.find.page; draw();
+  document.querySelectorAll(`.hit[data-s="${q.find.s}"]`).forEach(h => h.classList.add('proof'));
+  $('#backQ').hidden = false;
+}
+$('#backQ').onclick = () => { $('#backQ').hidden = true; if(returnTo){ cur = returnTo; returnTo = null; draw(); } if(QS) showQ(); };
+function finishCard(){
+  autoplay = false; setTimeout(() => playFb('tebrikler'), 300);
+  $('#qz').className = 'qz';
+  const total = BOOK.quiz.filter(q => SCORABLE(q.type)).length, got = sessionStars.size;
+  const host = BOOK.host || {};
+  $('#qz').innerHTML = `
+    <div class="qz-h">${host.face ? `<img class="ava" src="books/${BOOK.id}/${host.face}" alt="">` : ''}<div class="qz-who"><b>Tebrikler!</b><small>Kitabı bitirdin.</small></div></div>
+    <p class="stars" aria-label="${got} / ${total}">${'<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z"/></svg>'.repeat(got)}<span class="off">${'<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z"/></svg>'.repeat(Math.max(0, total - got))}</span></p>
+    <p class="qz-fb">${got} / ${total}</p>
+    <div class="qz-foot"><button class="qz-btn alt" data-close>Kapat</button><button class="qz-btn alt" data-again><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,47.88V208.12a16,16,0,0,1-24.43,13.43L64,146.77V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0v69.23L183.57,34.45A15.95,15.95,0,0,1,208,47.88Z"/></svg> Baştan oku</button><button class="qz-btn main" data-shelf>Rafa dön</button></div>`;
+  $('#qzScrim').hidden = false;
+  $('#qz').querySelector('[data-close]').onclick = () => { $('#qzScrim').hidden = true; draw(); };
+  $('#qz').querySelector('[data-again]').onclick = () => { $('#qzScrim').hidden = true; quizDone = new Set(); sessionStars = new Set(); cur = 1; draw(); };
+  $('#qz').querySelector('[data-shelf]').onclick = () => { $('#qzScrim').hidden = true; location.hash = ''; };
+}
+$('#qz').addEventListener('click', e => e.stopPropagation());
+
+/* ---------- güncel sürüm kontrolü: tarayıcı eski sayfayı tutuyorsa yenisini yükle ---------- */
+const APPV = '202611220050';
+fetch('version.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
+  if(!j || !j.v || j.v === APPV) return;
+  const u = new URL(location.href);
+  if(u.searchParams.get('v') === j.v) return;      // zaten denendi, döngüye girme
+  u.searchParams.set('v', j.v); location.replace(u.toString());
+}).catch(() => {});
+route();
+showCount();
+</script>
+
+</body>
+</html>
