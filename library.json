@@ -11,28 +11,32 @@
      "no": 1,
      "title": "Kitapta Bir Fare Var",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     },
     {
      "id": "leyla-ile-lale",
      "no": 2,
      "title": "Leyla İle Lale",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     },
     {
      "id": "bir-ilkbahar-gunu",
      "no": 3,
      "title": "Bir İlkbahar Günü",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     },
     {
      "id": "leyla-ve-arkadaslari-mutfakta",
      "no": 4,
      "title": "Leyla ve Arkadaşları Mutfakta",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     }
    ]
   },
@@ -47,28 +51,32 @@
      "no": 1,
      "title": "Çantada Ne Var?",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     },
     {
      "id": "bilet-nerede",
      "no": 2,
      "title": "Bilet Nerede?",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     },
     {
      "id": "sesim-sesim-guzel-sesim",
      "no": 3,
      "title": "Sesim Sesim Güzel Sesim",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     },
     {
      "id": "kutuphanede-bir-gun",
      "no": 4,
      "title": "Kütüphanede Bir Gün",
      "ready": true,
-     "pages": 24
+     "pages": 24,
+     "audio": true
     }
    ]
   },
@@ -83,28 +91,32 @@
      "no": 1,
      "title": "Uç Uç Uçurtma",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "kucuk-dostlarimiz",
      "no": 2,
      "title": "Küçük Dostlarımız",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "piknige-gidiyoruz",
      "no": 3,
      "title": "Pikniğe Gidiyoruz",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "penceremde-bir-misafir",
      "no": 4,
      "title": "Penceremde Bir Misafir",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     }
    ]
   },
@@ -119,28 +131,32 @@
      "no": 1,
      "title": "Lunapark Macerası",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "bir-hayalim-var",
      "no": 2,
      "title": "Bir Hayalim Var",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "fistiklar-kimin",
      "no": 3,
      "title": "Fıstıklar Kimin?",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "istanbulda-bir-gun",
      "no": 4,
      "title": "İstanbul'da Bir Gün",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     }
    ]
   },
@@ -155,81 +171,40 @@
      "no": 1,
      "title": "Arkadaşlarım Şirin Mutfakta",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "sirin-mutfakta-bir-oyuncu-var",
      "no": 2,
      "title": "Şirin Mutfakta Bir Oyuncu Var",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true
     },
     {
      "id": "gunun-ilginc-fotografi",
      "no": 3,
      "title": "Günün İlginç Fotoğrafı",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": false
     },
     {
      "id": "hey-piri",
      "no": 4,
      "title": "Hey Piri",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": false
     },
     {
      "id": "sirin-mutfakta-resim-dersi",
      "no": 5,
      "title": "Şirin Mutfakta Resim Dersi",
      "ready": true,
-     "pages": 32
-    }
-   ]
-  },
-  {
-   "id": "9",
-   "title": "9. Sınıf",
-   "sub": "A1 · 15+ yaş",
-   "note": "",
-   "books": [
-    {
-     "id": "hoscakal",
-     "no": 1,
-     "title": "Hoşça Kal!",
-     "ready": true,
-     "pages": 48
-    },
-    {
-     "id": "yolculuk",
-     "no": 2,
-     "title": "Yolculuk",
-     "ready": true,
-     "pages": 48
-    },
-    {
-     "id": "burasi-istanbul",
-     "no": 3,
-     "title": "Burası İstanbul",
-     "ready": false,
-     "pages": 48,
-     "cover": false
-    },
-    {
-     "id": "pembe-konak",
-     "no": 4,
-     "title": "Pembe Konak",
-     "ready": false,
-     "pages": 48,
-     "cover": false
-    },
-    {
-     "id": "ekip-isi",
-     "no": 5,
-     "title": "Ekip İşi",
-     "ready": false,
-     "pages": 48,
-     "cover": false
+     "pages": 32,
+     "audio": false
     }
    ]
   },
@@ -244,7 +219,9 @@
      "no": 2,
      "title": "Kutlama Günü",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true,
+     "new": true
     }
    ]
   },
@@ -259,7 +236,60 @@
      "no": 2,
      "title": "Mahallede Hırsız Var",
      "ready": true,
-     "pages": 32
+     "pages": 32,
+     "audio": true,
+     "new": true
+    }
+   ]
+  },
+  {
+   "id": "9",
+   "title": "9. Sınıf",
+   "sub": "A1 · 15+ yaş",
+   "note": "",
+   "books": [
+    {
+     "id": "hoscakal",
+     "no": 1,
+     "title": "Hoşça Kal!",
+     "ready": true,
+     "pages": 48,
+     "audio": true
+    },
+    {
+     "id": "yolculuk",
+     "no": 2,
+     "title": "Yolculuk",
+     "ready": true,
+     "pages": 48,
+     "audio": true
+    },
+    {
+     "id": "burasi-istanbul",
+     "no": 3,
+     "title": "Burası İstanbul",
+     "ready": false,
+     "pages": 48,
+     "cover": false,
+     "audio": false
+    },
+    {
+     "id": "pembe-konak",
+     "no": 4,
+     "title": "Pembe Konak",
+     "ready": false,
+     "pages": 48,
+     "cover": false,
+     "audio": false
+    },
+    {
+     "id": "ekip-isi",
+     "no": 5,
+     "title": "Ekip İşi",
+     "ready": false,
+     "pages": 48,
+     "cover": false,
+     "audio": false
     }
    ]
   }
