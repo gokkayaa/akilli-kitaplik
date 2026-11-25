@@ -8,7 +8,7 @@
 <title>Akıllı Kitaplık</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Outfit:wght@300;800&family=Nunito:wght@500;700;800&display=swap">
 <style>
 /* Layout: a school library wall — teal header band, then shelves of face-out books on planks; tapping a cover opens the reading desk. */
 :root{
@@ -41,12 +41,15 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 /* Kayan kapak duvarı: sütunlar sırayla aşağı/yukarı akar; seviye seçilince o setin kitapları renklenir, altta seri listelenir. */
 :root{--lb-deep:#0b4f55;--lb-night:#062f33;--lb-sun:#ffc83d;--lb-coral:#ff6f5e}
 #lib{min-height:100%;background:var(--lb-deep);color:#fff}
-.band{position:relative;z-index:5;background:#00adb9;color:#04282b}
-.band-in{max-width:1280px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:14px}
-.logo{background:#fff;border-radius:14px;padding:5px 7px;flex:none;display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,60,65,.6)}
-.logo img{height:44px;width:auto;display:block}
-.band h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.2rem);line-height:1;margin:0;color:#04282b}
-.wallx{position:relative;height:min(46vh,430px);overflow:hidden;background:var(--lb-night)}
+.band{position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none}
+.band-in{padding:22px 32px;display:flex;align-items:center;gap:14px}
+#lib{position:relative}
+.wm{margin:0;font:300 clamp(1.9rem,4vw,2.5rem)/1 Outfit,var(--f-display);letter-spacing:-.02em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.35)}
+.wm b{font-weight:800}
+.wm i{display:inline-block;width:.3em;height:.3em;border-radius:50%;background:#00adb9;margin-left:.08em}
+.mlogo{margin-left:auto;height:60px;width:auto;display:block}
+.wallx{position:relative;height:min(52vh,470px);overflow:hidden;background:var(--lb-night)}
+.wallx::before{content:"";position:absolute;left:0;right:0;top:0;height:150px;z-index:2;pointer-events:none;background:linear-gradient(rgba(6,47,51,.92),rgba(6,47,51,.55) 55%,transparent)}
 .cols{position:absolute;inset:-160px -140px;display:flex;gap:12px;transform:rotate(-8deg);transition:opacity .25s}
 .wallx.shuffle .cols{opacity:0}
 .col{flex:1;min-width:0}
@@ -96,7 +99,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .cnt{margin-left:10px;opacity:.7;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .cnt b{font-weight:800}
 .foot{max-width:1280px;margin:0 auto;padding:0 32px 30px;color:#8fc9ce;font-size:.82rem;font-weight:700}
-@media (max-width:760px){.band-in{padding:12px 16px}.logo img{height:36px}.wallx{height:44vh}.cols{inset:-120px -160px}
+@media (max-width:760px){.band-in{padding:16px}.mlogo{height:44px}.wallx{height:50vh}.cols{inset:-120px -160px}
   .series{padding:24px 16px 30px}.series .hint{display:none}.series h2{font-size:2rem}
   .grid{grid-template-columns:repeat(2,1fr);gap:18px}.foot{padding-inline:16px}}
 @media (prefers-reduced-motion:reduce){.track,.bk,.wave i{animation:none!important}.tile,.tile img,.cols{transition:none}}
@@ -330,8 +333,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 <div id="lib">
   <header class="band">
     <div class="band-in">
-      <div class="logo"><img src="assets/maarif-logo.png" alt="Türkiye Maarif Vakfı"></div>
-      <h1>Akıllı Kitaplık</h1>
+      <h1 class="wm" aria-label="Akıllı Kitaplık"><span aria-hidden="true">akıllı<b>kitaplık</b><i></i></span></h1>
+      <img class="mlogo" src="assets/maarif-logo-t.png" alt="Türkiye Maarif Vakfı">
     </div>
   </header>
   <section class="wallx" id="wallx"><div class="cols" id="cols" aria-hidden="true"></div>
@@ -1117,7 +1120,7 @@ function finishCard(){
 $('#qz').addEventListener('click', e => e.stopPropagation());
 
 /* ---------- güncel sürüm kontrolü: tarayıcı eski sayfayı tutuyorsa yenisini yükle ---------- */
-const APPV = '202611251125';
+const APPV = '202611251220';
 fetch('version.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
   if(!j || !j.v || j.v === APPV) return;
   const u = new URL(location.href);
