@@ -314,10 +314,23 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
 .playtip::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:#15302f}
 @keyframes tipb{to{transform:translateY(-4px)}}
 /* alt yazi */
-.subbar{position:relative;margin:4px auto 0;overflow:hidden;box-sizing:border-box;max-width:min(980px,96vw);background:var(--card);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08);padding:8px 14px;font-size:.98rem;line-height:1.35}
+.subbar{position:absolute;z-index:4;overflow:hidden;box-sizing:border-box;background:var(--card);border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.22);padding:10px 14px;font-size:.98rem;line-height:1.35;transition:left .25s ease,top .25s ease,opacity .2s}
+.subbar.side{border-left:4px solid var(--teal)}
+.subbar.over{background:color-mix(in srgb,var(--card) 95%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:2px solid color-mix(in srgb,var(--teal) 60%,transparent);font-size:var(--sf,16px);padding:.6em .85em;line-height:1.3}
+.subbar.over b{font-size:1.2em;margin-bottom:.15em}
+.subbar.over span{color:var(--ink)}
+.subbar.over i{font-size:.8em}
+.subbar.over.empty{opacity:0;pointer-events:none}
+.subbar span+span,.subbar b+span{margin-top:2px}
+/* tahta modu: başlık ve butonlar kitabın üstünde, 3 sn sonra gizlenir */
+#reader{position:relative}
+#reader.fs .rbar{position:absolute;top:0;left:0;right:0;z-index:20;padding-inline:16px;background:linear-gradient(var(--desk) 70%,transparent);transition:opacity .3s}
+#reader.fs .nav{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(transparent,var(--desk) 30%);transition:opacity .3s}
+#reader.fs .stage{padding-block:8px}
+#reader.fs.idle .rbar,#reader.fs.idle .nav{opacity:0;pointer-events:none}
+#fsBtn[aria-pressed="true"]{border-color:var(--teal);color:var(--teal-deep)}
 .subbar b{display:block;font-family:var(--f-display);font-size:1.12rem;color:var(--ink)}
 .subbar span{display:block;color:var(--ink-soft)} .subbar i{font-style:normal;font-weight:800;color:var(--teal-deep);margin-right:6px;font-size:.8rem}
-.teach .subbar{font-size:1.2rem}.teach .subbar b{font-size:1.45rem}
 #trBtn .lbl{font-weight:800}
 /* sayfa katlanma */
 .foldwrap{position:absolute;pointer-events:none;z-index:5;overflow:hidden;will-change:transform;box-shadow:0 0 30px rgba(0,0,0,.25)}
@@ -364,9 +377,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offse
   <main class="stage" id="stage">
     <div class="book" id="book"></div>
     <div class="tip gone" id="tip">Haydi, kelimeye dokun!</div>
+    <div class="subbar" id="subbar" hidden></div>
     <button class="back-q" id="backQ" hidden><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,48V208a8,8,0,0,1-13.66,5.66l-80-80a8,8,0,0,1,0-11.32l80-80A8,8,0,0,1,168,48Z"/></svg>Soruya dön</button>
   </main>
-  <div class="subbar" id="subbar" hidden></div>
   <nav class="nav" aria-label="Sayfalar">
     <button id="prev" aria-label="Önceki sayfa"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,48V208a8,8,0,0,1-13.66,5.66l-80-80a8,8,0,0,1,0-11.32l80-80A8,8,0,0,1,168,48Z"/></svg></button>
     <button id="pno" title="Sayfa seç" aria-label="Sayfa seç"></button>
@@ -402,40 +415,77 @@ let hints = store.get('or.hints', true);
 let bag = [], cur = 1, active = null, showSent = false, two = false;
 let T = false, tool = 'tap'; store.set('or.teach', false);
 let trMode = store.get('or.trmode', 'off'), subSid = null;
-const TRM = {off:'Kapalı', card:'Kartta', bar:'Altta'};
+const TRM = {off:'Kapalı', card:'Kartta', bar:'Altyazı'};
 function syncTr(){
   $('#trBtn .lbl').textContent = 'Cümle: ' + TRM[trMode]; $('#trBtn').setAttribute('aria-pressed', trMode !== 'off');
   const sb = $('#subbar'), was = sb.hidden; sb.hidden = trMode !== 'bar';
-  if(!sb.hidden && !subSid) sb.innerHTML = '<span>Bir kelimeye dokun ya da “Sesli dinle”ye bas: cümlenin çevirisi burada görünür.</span>';
-  if(was !== sb.hidden && BOOK) layout(); else sizeSub();
+  if(!sb.hidden && !subSid){ sb.innerHTML = '<span>Bir kelimeye dokun ya da “Sesli dinle”ye bas: cümlenin çevirisi burada görünür.</span>'; sb.classList.add('empty'); }
+  if(was !== sb.hidden && BOOK) layout(); else placeSub();
 }
 function showSub(sid){
   if(trMode !== 'bar' || !BOOK || !BOOK.sent[sid] || sid === subSid) return;
-  subSid = sid; $('#subbar').innerHTML = subHtml(sid); fitSub();
+  document.querySelectorAll('.playtip').forEach(e => e.remove());
+  subSid = sid; const sb = $('#subbar'); sb.innerHTML = subHtml(sid); sb.classList.remove('empty'); placeSub();
 }
 function subHtml(sid){
   const s = BOOK.sent[sid];
   return `<b>${s.tr}</b>` + langs.map(l => `<span><i>${l === 'ky' ? 'KG' : l.toUpperCase()}</i>${s[l]}</span>`).join('');
 }
-// Altyazı şeridi kitap boyunca sabit boyda (en uzun cümleye göre, en fazla ekranın %20'si); okurken ve sayfa çevirirken kitap boyu değişmez.
-// Sığmayan uzun cümlede yalnız yazı küçülür.
-function sizeSub(){
-  const sb = $('#subbar'); if(sb.hidden || !BOOK || $('#reader').hidden) return;
-  const key = BOOK.id + langs.join() + sb.offsetWidth + innerHeight; if(sb.dataset.k === key) return; sb.dataset.k = key;
-  const sids = Object.keys(BOOK.sent);
-  const m = sb.cloneNode(false); m.removeAttribute('id'); m.hidden = false;
-  m.style.cssText = `position:absolute;visibility:hidden;left:0;top:0;height:auto;width:${sb.offsetWidth}px;max-width:none`;
-  document.body.appendChild(m);
-  let max = 0;
-  for(const k of sids){ m.innerHTML = subHtml(k); max = Math.max(max, m.offsetHeight); }
-  if(!sids.length){ m.innerHTML = sb.innerHTML; max = m.offsetHeight; }
-  m.remove();
-  sb.style.height = Math.min(max, Math.round(innerHeight * .2)) + 'px'; fitSub();
+// Altyazı kitabı küçültmez. Geniş ekranda kitabın yanında sabit bir panel (side);
+// dar ekranda sayfanın üstünde, okunan cümleden uzak yere konan bir kart (over).
+let subSide = 0;
+function sizeSub(){}
+function sideWidth(sw){ return Math.round(Math.min(340, Math.max(210, sw * .22))); }
+// kitabın yüksekliğini ve altyazı düzenini hesaplar
+function bookH(n){
+  const st = $('#stage'), cs = getComputedStyle(st), ratio = asp() * n, sw = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), sh = st.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const full = Math.min(sh, sw / ratio); subSide = 0;
+  if(false){
+    const S = sideWidth(sw), hs = Math.min(sh, (sw - S - 14) / ratio);
+    if(hs >= full * .93){ subSide = S; return hs; }
+  }
+  return full;
 }
+function placeSub(){
+  const sb = $('#subbar'); if(sb.hidden || !BOOK || $('#reader').hidden) return;
+  const bk = $('#book'), st = $('#stage');
+  const bl = bk.offsetLeft, bt = bk.offsetTop, bw = bk.offsetWidth, bh = bk.offsetHeight;
+  sb.classList.toggle('side', !!subSide); sb.classList.toggle('over', !subSide);
+  if(subSide){
+    sb.style.width = subSide + 'px'; sb.style.maxHeight = bh + 'px'; sb.style.height = '';
+    sb.style.left = (bl + bw + 14) + 'px'; sb.style.top = bt + 'px';
+    fitSub(); return;
+  }
+  // over: kart, cümlenin olmadığı sayfaya / bölgeye
+  const pgs = [...bk.querySelectorAll('.page')], pw = bw / Math.max(1, pgs.length);
+  const W = Math.min(pw * .9, Math.max(300, bh * .62)); sb.style.width = W + 'px'; sb.style.maxHeight = Math.round(bh * .45) + 'px'; sb.style.height = '';
+  sb.style.setProperty('--sf', Math.round(Math.min(30, Math.max(15, bh * .025))) + 'px');
+  fitSub();
+  const H = sb.offsetHeight;
+  let pi = pgs.length - 1, sy = null;
+  if(subSid){
+    const hits = [...bk.querySelectorAll('.hit')].filter(h => h.dataset.s === subSid);
+    if(hits.length){
+      const own = pgs.indexOf(hits[0].closest('.page'));
+      sy = hits.reduce((m, h) => m + parseFloat(h.style.top), 0) / hits.length;
+      if(pgs.length === 2) pi = own === 0 ? 1 : 0; else pi = 0;
+    }
+  }
+  // hedef sayfada üst ve alt bölgeyi karşılaştır: yazısı az ve cümleye uzak olan
+  const pg = pgs[pi]; if(!pg) return;
+  const hp = H / bh * 100, m = 3;
+  const words = [...pg.querySelectorAll('.hit')].map(h => [parseFloat(h.style.top), parseFloat(h.style.height)]);
+  const cost = y0 => words.filter(([t, hh]) => t + hh > y0 && t < y0 + hp).length * 3 + (sy !== null && pgs.length === 1 && sy > y0 - 6 && sy < y0 + hp + 6 ? 1000 : 0);
+  const cands = [100 - hp - m, m, 50 - hp / 2];
+  let best = cands[0], bc = Infinity; for(const y of cands){ const c = cost(y); if(c < bc){ bc = c; best = y; } }
+  sb.style.left = (bl + pi * pw + (pw - W) / 2) + 'px';
+  sb.style.top = (bt + best / 100 * bh) + 'px';
+}
+if(document.fonts) document.fonts.ready.then(() => { const sb = document.querySelector('#subbar'); if(sb) sb.dataset.f = 1; placeSub(); });
 function fitSub(){
   const sb = $('#subbar'); if(sb.hidden) return;
   let fs = 1; sb.style.fontSize = '';
-  while(sb.scrollHeight > sb.clientHeight + 1 && fs > .6){ fs -= .06; sb.style.fontSize = fs + 'em'; }
+  while(sb.scrollHeight > sb.clientHeight + 1 && fs > .6){ fs -= .05; sb.style.fontSize = `calc(var(--sf,16px) * ${fs.toFixed(2)})`; }
 }
 
 /* ---------- library ---------- */
@@ -578,12 +628,7 @@ function draw(){
   const pages = spreadOf(cur), bookEl = $('#book'), stage = $('#stage');
   bookEl.innerHTML = ''; bookEl.classList.toggle('two', pages.length === 2);
   pages.forEach(n => bookEl.appendChild(pageEl(BOOK.pages[n - 1])));
-  sizeSub();
-  // size: fit spread inside stage
-  const ratio = asp() * pages.length;
-  const sw = stage.clientWidth, sh = stage.clientHeight;
-  let h = Math.min(sh, sw / ratio);
-  sizeBook(h);
+  sizeBook(bookH(pages.length));
   const N = BOOK.pages.length;
   $('#pno').textContent = pages.length === 2 ? `${pages[0]}–${pages[1]} / ${N}` : `${pages[0]} / ${N}`;
   $('#prev').disabled = pages[0] <= 1;
@@ -601,12 +646,14 @@ function draw(){
 function sizeBook(h){
   const bk = $('#book'); bk.style.height = h + 'px'; bk.style.width = (h * asp() * bk.querySelectorAll('.page').length) + 'px';
   bk.querySelectorAll('.page').forEach(pg => pg.style.width = (h * asp()) + 'px');
+  bk.style.marginRight = subSide ? (subSide + 14) + 'px' : '';
+  requestAnimationFrame(placeSub);
 }
 function fitBook(){
   if(!BOOK || $('#reader').hidden) return;
   const bk = $('#book'), st = $('#stage'), n = bk.children.length ? bk.querySelectorAll('.page').length : 0; if(!n) return;
-  const ratio = asp() * n, h = Math.min(st.clientHeight, st.clientWidth / ratio);
-  if(Math.abs(parseFloat(bk.style.height) - h) > 1){ sizeBook(h); if(active) place(active); }
+  const h = bookH(n);
+  if(Math.abs(parseFloat(bk.style.height) - h) > 1){ sizeBook(h); if(active) place(active); } else placeSub();
 }
 if(window.ResizeObserver){ const ro = new ResizeObserver(() => fitBook()); addEventListener('load', () => ro.observe($('#stage'))); ro.observe(document.querySelector('#stage') || document.body); }
 function pageEl(p){
@@ -738,7 +785,7 @@ document.querySelectorAll('.chip').forEach(c => c.onclick = e => {
   e.stopPropagation(); const l = c.dataset.lang;
   if(langs.includes(l)){ if(langs.length === 1) return; langs = langs.filter(x => x !== l); }
   else langs = ['en','ky','ru'].filter(x => x === l || langs.includes(x));
-  store.set('or.langs', langs); syncLangs(); if(active){ render(active); place(active); } if(subSid){ const s0 = subSid; subSid = null; showSub(s0); } sizeSub();
+  store.set('or.langs', langs); syncLangs(); if(active){ render(active); place(active); } if(subSid){ const s0 = subSid; subSid = null; showSub(s0); } placeSub();
 });
 function syncHints(){ $('#book').classList.toggle('hints', hints); $('#hintBtn').setAttribute('aria-pressed', hints); }
 $('#hintBtn').onclick = () => { hints = !hints; store.set('or.hints', hints); syncHints(); };
@@ -763,8 +810,21 @@ $('#bagClear').onclick = () => {
 };
 
 /* ---------- fullscreen (optional) ---------- */
-$('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } }catch(e){} };
-if(!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
+// Tahta modu: kitap ekranı doldurur; başlık ve butonlar dokununca 3 sn görünür.
+let idleT = null;
+function wake(){ const r = $('#reader'); if(!r.classList.contains('fs')) return; r.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => r.classList.add('idle'), 3000); }
+function setFs(on){
+  const r = $('#reader'); r.classList.toggle('fs', on); $('#fsBtn').setAttribute('aria-pressed', on);
+  if(on) wake(); else { r.classList.remove('idle'); clearTimeout(idleT); }
+  if(BOOK) layout();
+}
+$('#fsBtn').onclick = () => {
+  const on = !$('#reader').classList.contains('fs');
+  try{ if(on){ const p = document.documentElement.requestFullscreen?.(); if(p) p.catch(() => {}); } else if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
+  setFs(on);
+};
+document.addEventListener('fullscreenchange', () => { if(!document.fullscreenElement && $('#reader').classList.contains('fs')) setFs(false); });
+['pointerdown','pointermove','keydown'].forEach(e => addEventListener(e, wake, {passive:true}));
 
 /* ---------- narration: page player + karaoke + speed ---------- */
 // ses.json: sayfa biçimi  "_p": {no: {f, d, y: {A|B: {f, s: {sid: [o, k]}}}}},  sid: {p, a, b, w}
