@@ -196,7 +196,7 @@
      "title": "Hey Piri",
      "ready": true,
      "pages": 32,
-     "audio": false
+     "audio": true
     },
     {
      "id": "sirin-mutfakta-resim-dersi",
