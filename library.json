@@ -277,19 +277,19 @@
      "id": "pembe-konak",
      "no": 4,
      "title": "Pembe Konak",
-     "ready": false,
+     "ready": true,
      "pages": 48,
-     "cover": false,
-     "audio": false
+     "audio": false,
+     "new": true
     },
     {
      "id": "ekip-isi",
      "no": 5,
      "title": "Ekip İşi",
-     "ready": false,
+     "ready": true,
      "pages": 48,
-     "cover": false,
-     "audio": false
+     "audio": false,
+     "new": true
     }
    ]
   }
