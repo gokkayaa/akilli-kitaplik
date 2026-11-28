@@ -1136,7 +1136,7 @@ function finishCard(){
 $('#qz').addEventListener('click', e => e.stopPropagation());
 
 /* ---------- güncel sürüm kontrolü: tarayıcı eski sayfayı tutuyorsa yenisini yükle ---------- */
-const APPV = '202611290431';
+const APPV='202611290500';
 fetch('version.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
   if(!j || !j.v || j.v === APPV) return;
   const u = new URL(location.href);
