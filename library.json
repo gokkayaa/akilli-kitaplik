@@ -268,10 +268,10 @@
      "id": "burasi-istanbul",
      "no": 3,
      "title": "Burası İstanbul",
-     "ready": false,
+     "ready": true,
      "pages": 48,
-     "cover": false,
-     "audio": false
+     "audio": false,
+     "new": true
     },
     {
      "id": "pembe-konak",
